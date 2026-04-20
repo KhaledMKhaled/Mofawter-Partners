@@ -235,9 +235,9 @@ export default function AdminOrders() {
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1 flex-wrap">
                           {allowed.map((ns) => (
-                            <Button key={ns} size="sm" variant="outline" className={`gap-1 text-xs ${locale === "ar" ? "flex-row-reverse" : ""}`} onClick={() => handleTransition(order, ns)}>
+                            <Button key={ns} size="sm" variant="outline" className="gap-1 text-xs" onClick={() => handleTransition(order, ns)}>
                               {t.orderStatus[ns as keyof typeof t.orderStatus] ?? ns}
-                              <ChevronRight className={`h-3 w-3 ${locale === "ar" ? "rotate-180" : ""}`} />
+                              <ChevronRight className="h-3 w-3" />
                             </Button>
                           ))}
                           {isAdmin && !isTerminal && (

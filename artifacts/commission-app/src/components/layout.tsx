@@ -105,8 +105,8 @@ export default function Layout({ children, user }: LayoutProps) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <Sidebar className="border-r bg-sidebar">
+      <div className="flex min-h-screen w-full" dir={locale === "ar" ? "rtl" : "ltr"}>
+        <Sidebar side={locale === "ar" ? "right" : "left"} className={locale === "ar" ? "border-l bg-sidebar" : "border-r bg-sidebar"}>
           {/* Brand Header */}
           <SidebarHeader className="border-b border-sidebar-border px-5 py-4">
             <div className="flex items-center gap-3">
@@ -143,9 +143,9 @@ export default function Layout({ children, user }: LayoutProps) {
                                 : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                             }`}
                           >
-                            <Link href={item.url} className="flex items-center gap-3 px-3 py-2.5">
+                            <Link href={item.url} className={`flex items-center gap-3 px-3 py-2.5 ${locale === "ar" ? "flex-row" : ""}`}>
                               <item.icon className={`h-4 w-4 flex-shrink-0 ${isActive ? "text-primary" : ""}`} />
-                              <span className="text-sm">{item.title}</span>
+                              <span className="text-sm font-medium">{item.title}</span>
                               {isActive && (
                                 <div className="ms-auto h-1.5 w-1.5 rounded-full bg-primary" />
                               )}

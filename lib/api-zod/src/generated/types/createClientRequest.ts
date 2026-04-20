@@ -8,6 +8,19 @@
 
 export interface CreateClientRequest {
   name: string;
+  taxCardNumber: string;
+  taxCardName: string;
+  issuingAuthority: string;
+  commercialRegistryNumber: string;
+  businessType: string;
+  email: string;
+  phone1: string;
+  phone1WhatsApp: boolean;
+  /** @nullable */
+  phone2?: string | null;
+  phone2WhatsApp?: boolean;
+  nationalId: string;
+  address: string;
   /** @nullable */
   assignedSalesId?: number | null;
 }

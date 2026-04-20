@@ -66,6 +66,18 @@ export const CreateUserBody = zod.object({
 export const ListClientsResponseItem = zod.object({
   id: zod.number(),
   name: zod.string(),
+  taxCardNumber: zod.string(),
+  taxCardName: zod.string(),
+  issuingAuthority: zod.string(),
+  commercialRegistryNumber: zod.string(),
+  businessType: zod.string(),
+  email: zod.string(),
+  phone1: zod.string(),
+  phone1WhatsApp: zod.boolean(),
+  phone2: zod.string().nullish(),
+  phone2WhatsApp: zod.boolean().optional(),
+  nationalId: zod.string(),
+  address: zod.string(),
   assignedSalesId: zod.number(),
   assignedDistributorId: zod.number(),
   ownershipStartDate: zod.coerce.date(),
@@ -76,7 +88,142 @@ export const ListClientsResponse = zod.array(ListClientsResponseItem);
 
 export const CreateClientBody = zod.object({
   name: zod.string(),
+  taxCardNumber: zod.string(),
+  taxCardName: zod.string(),
+  issuingAuthority: zod.string(),
+  commercialRegistryNumber: zod.string(),
+  businessType: zod.string(),
+  email: zod.string(),
+  phone1: zod.string(),
+  phone1WhatsApp: zod.boolean(),
+  phone2: zod.string().nullish(),
+  phone2WhatsApp: zod.boolean().optional(),
+  nationalId: zod.string(),
+  address: zod.string(),
   assignedSalesId: zod.number().nullish(),
+});
+
+export const LookupClientQueryParams = zod.object({
+  taxCardNumber: zod.coerce.string(),
+});
+
+export const LookupClientResponse = zod.object({
+  found: zod.boolean(),
+  client: zod
+    .object({
+      id: zod.number(),
+      name: zod.string(),
+      taxCardNumber: zod.string(),
+      taxCardName: zod.string(),
+      issuingAuthority: zod.string(),
+      commercialRegistryNumber: zod.string(),
+      businessType: zod.string(),
+      email: zod.string(),
+      phone1: zod.string(),
+      phone1WhatsApp: zod.boolean(),
+      phone2: zod.string().nullish(),
+      phone2WhatsApp: zod.boolean().optional(),
+      nationalId: zod.string(),
+      address: zod.string(),
+      assignedSalesId: zod.number(),
+      assignedDistributorId: zod.number(),
+      ownershipStartDate: zod.coerce.date(),
+      ownershipEndDate: zod.coerce.date(),
+      createdAt: zod.coerce.date(),
+    })
+    .optional(),
+  hasPendingOrder: zod.boolean().optional(),
+});
+
+export const GetClientProfileParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetClientProfileResponse = zod.object({
+  client: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    taxCardNumber: zod.string(),
+    taxCardName: zod.string(),
+    issuingAuthority: zod.string(),
+    commercialRegistryNumber: zod.string(),
+    businessType: zod.string(),
+    email: zod.string(),
+    phone1: zod.string(),
+    phone1WhatsApp: zod.boolean(),
+    phone2: zod.string().nullish(),
+    phone2WhatsApp: zod.boolean().optional(),
+    nationalId: zod.string(),
+    address: zod.string(),
+    assignedSalesId: zod.number(),
+    assignedDistributorId: zod.number(),
+    ownershipStartDate: zod.coerce.date(),
+    ownershipEndDate: zod.coerce.date(),
+    createdAt: zod.coerce.date(),
+  }),
+  orders: zod.array(
+    zod.object({
+      id: zod.number(),
+      clientId: zod.number(),
+      clientName: zod.string().nullish(),
+      packageId: zod.number().nullish(),
+      packageName: zod.string().nullish(),
+      salesId: zod.number().nullish(),
+      salesName: zod.string().nullish(),
+      distributorId: zod.number().nullish(),
+      distributorName: zod.string().nullish(),
+      orderName: zod.string(),
+      amount: zod.number(),
+      vatAmount: zod.number(),
+      receiptNumber: zod.string().nullish(),
+      isFullyCollected: zod.boolean(),
+      orderDate: zod.coerce.date(),
+      status: zod.enum(["PENDING", "COMPLETED"]),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+export const UpdateClientParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateClientBody = zod.object({
+  name: zod.string().optional(),
+  taxCardNumber: zod.string().optional(),
+  taxCardName: zod.string().optional(),
+  issuingAuthority: zod.string().optional(),
+  commercialRegistryNumber: zod.string().optional(),
+  businessType: zod.string().optional(),
+  email: zod.string().optional(),
+  phone1: zod.string().optional(),
+  phone1WhatsApp: zod.boolean().optional(),
+  phone2: zod.string().nullish(),
+  phone2WhatsApp: zod.boolean().optional(),
+  nationalId: zod.string().optional(),
+  address: zod.string().optional(),
+});
+
+export const UpdateClientResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  taxCardNumber: zod.string(),
+  taxCardName: zod.string(),
+  issuingAuthority: zod.string(),
+  commercialRegistryNumber: zod.string(),
+  businessType: zod.string(),
+  email: zod.string(),
+  phone1: zod.string(),
+  phone1WhatsApp: zod.boolean(),
+  phone2: zod.string().nullish(),
+  phone2WhatsApp: zod.boolean().optional(),
+  nationalId: zod.string(),
+  address: zod.string(),
+  assignedSalesId: zod.number(),
+  assignedDistributorId: zod.number(),
+  ownershipStartDate: zod.coerce.date(),
+  ownershipEndDate: zod.coerce.date(),
+  createdAt: zod.coerce.date(),
 });
 
 export const ReassignClientParams = zod.object({
@@ -90,6 +237,18 @@ export const ReassignClientBody = zod.object({
 export const ReassignClientResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
+  taxCardNumber: zod.string(),
+  taxCardName: zod.string(),
+  issuingAuthority: zod.string(),
+  commercialRegistryNumber: zod.string(),
+  businessType: zod.string(),
+  email: zod.string(),
+  phone1: zod.string(),
+  phone1WhatsApp: zod.boolean(),
+  phone2: zod.string().nullish(),
+  phone2WhatsApp: zod.boolean().optional(),
+  nationalId: zod.string(),
+  address: zod.string(),
   assignedSalesId: zod.number(),
   assignedDistributorId: zod.number(),
   ownershipStartDate: zod.coerce.date(),
@@ -120,16 +279,61 @@ export const ListClientAssignmentsResponse = zod.array(
   ListClientAssignmentsResponseItem,
 );
 
+export const ListPackagesResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  price: zod.number(),
+  vatPct: zod.number(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+export const ListPackagesResponse = zod.array(ListPackagesResponseItem);
+
+export const CreatePackageBody = zod.object({
+  name: zod.string(),
+  price: zod.number(),
+  vatPct: zod.number(),
+});
+
+export const UpdatePackageParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdatePackageBody = zod.object({
+  name: zod.string().optional(),
+  price: zod.number().optional(),
+  vatPct: zod.number().optional(),
+  isActive: zod.boolean().optional(),
+});
+
+export const UpdatePackageResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  price: zod.number(),
+  vatPct: zod.number(),
+  isActive: zod.boolean(),
+  createdAt: zod.coerce.date(),
+});
+
+export const DeletePackageParams = zod.object({
+  id: zod.coerce.number(),
+});
+
 export const ListOrdersResponseItem = zod.object({
   id: zod.number(),
   clientId: zod.number(),
   clientName: zod.string().nullish(),
+  packageId: zod.number().nullish(),
+  packageName: zod.string().nullish(),
   salesId: zod.number().nullish(),
   salesName: zod.string().nullish(),
   distributorId: zod.number().nullish(),
   distributorName: zod.string().nullish(),
   orderName: zod.string(),
   amount: zod.number(),
+  vatAmount: zod.number(),
+  receiptNumber: zod.string().nullish(),
+  isFullyCollected: zod.boolean(),
   orderDate: zod.coerce.date(),
   status: zod.enum(["PENDING", "COMPLETED"]),
   createdAt: zod.coerce.date(),
@@ -138,8 +342,9 @@ export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
 
 export const CreateOrderBody = zod.object({
   clientId: zod.number(),
-  orderName: zod.string(),
-  amount: zod.number(),
+  packageId: zod.number(),
+  receiptNumber: zod.string().nullish(),
+  isFullyCollected: zod.boolean(),
 });
 
 export const UpdateOrderStatusParams = zod.object({
@@ -154,12 +359,17 @@ export const UpdateOrderStatusResponse = zod.object({
   id: zod.number(),
   clientId: zod.number(),
   clientName: zod.string().nullish(),
+  packageId: zod.number().nullish(),
+  packageName: zod.string().nullish(),
   salesId: zod.number().nullish(),
   salesName: zod.string().nullish(),
   distributorId: zod.number().nullish(),
   distributorName: zod.string().nullish(),
   orderName: zod.string(),
   amount: zod.number(),
+  vatAmount: zod.number(),
+  receiptNumber: zod.string().nullish(),
+  isFullyCollected: zod.boolean(),
   orderDate: zod.coerce.date(),
   status: zod.enum(["PENDING", "COMPLETED"]),
   createdAt: zod.coerce.date(),
@@ -243,12 +453,17 @@ export const GetDashboardSummaryResponse = zod.object({
       id: zod.number(),
       clientId: zod.number(),
       clientName: zod.string().nullish(),
+      packageId: zod.number().nullish(),
+      packageName: zod.string().nullish(),
       salesId: zod.number().nullish(),
       salesName: zod.string().nullish(),
       distributorId: zod.number().nullish(),
       distributorName: zod.string().nullish(),
       orderName: zod.string(),
       amount: zod.number(),
+      vatAmount: zod.number(),
+      receiptNumber: zod.string().nullish(),
+      isFullyCollected: zod.boolean(),
       orderDate: zod.coerce.date(),
       status: zod.enum(["PENDING", "COMPLETED"]),
       createdAt: zod.coerce.date(),

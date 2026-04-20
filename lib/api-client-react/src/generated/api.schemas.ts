@@ -53,11 +53,106 @@ export interface CreateUserRequest {
 export interface Client {
   id: number;
   name: string;
+  taxCardNumber: string;
+  taxCardName: string;
+  issuingAuthority: string;
+  commercialRegistryNumber: string;
+  businessType: string;
+  email: string;
+  phone1: string;
+  phone1WhatsApp: boolean;
+  /** @nullable */
+  phone2?: string | null;
+  phone2WhatsApp?: boolean;
+  nationalId: string;
+  address: string;
   assignedSalesId: number;
   assignedDistributorId: number;
   ownershipStartDate: string;
   ownershipEndDate: string;
   createdAt: string;
+}
+
+export interface UpdateClientRequest {
+  name?: string;
+  taxCardNumber?: string;
+  taxCardName?: string;
+  issuingAuthority?: string;
+  commercialRegistryNumber?: string;
+  businessType?: string;
+  email?: string;
+  phone1?: string;
+  phone1WhatsApp?: boolean;
+  /** @nullable */
+  phone2?: string | null;
+  phone2WhatsApp?: boolean;
+  nationalId?: string;
+  address?: string;
+}
+
+export interface CreateClientRequest {
+  name: string;
+  taxCardNumber: string;
+  taxCardName: string;
+  issuingAuthority: string;
+  commercialRegistryNumber: string;
+  businessType: string;
+  email: string;
+  phone1: string;
+  phone1WhatsApp: boolean;
+  /** @nullable */
+  phone2?: string | null;
+  phone2WhatsApp?: boolean;
+  nationalId: string;
+  address: string;
+  /** @nullable */
+  assignedSalesId?: number | null;
+}
+
+export interface ClientLookupResult {
+  found: boolean;
+  client?: Client;
+  hasPendingOrder?: boolean;
+}
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+
+export const OrderStatus = {
+  PENDING: "PENDING",
+  COMPLETED: "COMPLETED",
+} as const;
+
+export interface Order {
+  id: number;
+  clientId: number;
+  /** @nullable */
+  clientName?: string | null;
+  /** @nullable */
+  packageId?: number | null;
+  /** @nullable */
+  packageName?: string | null;
+  /** @nullable */
+  salesId?: number | null;
+  /** @nullable */
+  salesName?: string | null;
+  /** @nullable */
+  distributorId?: number | null;
+  /** @nullable */
+  distributorName?: string | null;
+  orderName: string;
+  amount: number;
+  vatAmount: number;
+  /** @nullable */
+  receiptNumber?: string | null;
+  isFullyCollected: boolean;
+  orderDate: string;
+  status: OrderStatus;
+  createdAt: string;
+}
+
+export interface Client360Profile {
+  client: Client;
+  orders: Order[];
 }
 
 export interface ReassignClientRequest {
@@ -87,43 +182,34 @@ export interface ClientAssignment {
   createdAt: string;
 }
 
-export interface CreateClientRequest {
+export interface Package {
+  id: number;
   name: string;
-  /** @nullable */
-  assignedSalesId?: number | null;
+  price: number;
+  vatPct: number;
+  isActive: boolean;
+  createdAt: string;
 }
 
-export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+export interface CreatePackageRequest {
+  name: string;
+  price: number;
+  vatPct: number;
+}
 
-export const OrderStatus = {
-  PENDING: "PENDING",
-  COMPLETED: "COMPLETED",
-} as const;
-
-export interface Order {
-  id: number;
-  clientId: number;
-  /** @nullable */
-  clientName?: string | null;
-  /** @nullable */
-  salesId?: number | null;
-  /** @nullable */
-  salesName?: string | null;
-  /** @nullable */
-  distributorId?: number | null;
-  /** @nullable */
-  distributorName?: string | null;
-  orderName: string;
-  amount: number;
-  orderDate: string;
-  status: OrderStatus;
-  createdAt: string;
+export interface UpdatePackageRequest {
+  name?: string;
+  price?: number;
+  vatPct?: number;
+  isActive?: boolean;
 }
 
 export interface CreateOrderRequest {
   clientId: number;
-  orderName: string;
-  amount: number;
+  packageId: number;
+  /** @nullable */
+  receiptNumber?: string | null;
+  isFullyCollected: boolean;
 }
 
 export interface UpdateOrderStatusRequest {
@@ -216,3 +302,7 @@ export const ListUsersRole = {
   DISTRIBUTOR: "DISTRIBUTOR",
   SALES: "SALES",
 } as const;
+
+export type LookupClientParams = {
+  taxCardNumber: string;
+};

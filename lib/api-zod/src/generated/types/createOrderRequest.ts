@@ -8,6 +8,8 @@
 
 export interface CreateOrderRequest {
   clientId: number;
-  orderName: string;
-  amount: number;
+  packageId: number;
+  /** @nullable */
+  receiptNumber?: string | null;
+  isFullyCollected: boolean;
 }

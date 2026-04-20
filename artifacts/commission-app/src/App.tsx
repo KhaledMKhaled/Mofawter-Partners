@@ -28,7 +28,9 @@ import SalesCommissions from "@/pages/sales/commissions";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ component: Component, role }: { component: React.ComponentType, role: string }) {
+import ClientProfile from "@/pages/shared/client-profile";
+
+function ProtectedRoute({ component: Component, role }: { component: React.ComponentType, role: string | string[] }) {
   const [location, setLocation] = useLocation();
   const token = localStorage.getItem("auth_token");
 
@@ -47,7 +49,9 @@ function ProtectedRoute({ component: Component, role }: { component: React.Compo
     return <Redirect to="/login" />;
   }
 
-  if (user.role !== role) {
+  const hasRole = Array.isArray(role) ? role.includes(user.role) : user.role === role;
+
+  if (!hasRole) {
     // Redirect to their respective dashboard
     const route = user.role === "ADMIN" ? "/admin" : user.role === "DISTRIBUTOR" ? "/distributor" : "/sales";
     return <Redirect to={route} />;
@@ -83,6 +87,9 @@ function Router() {
       <Route path="/sales/clients">{(params) => <ProtectedRoute component={SalesClients} role="SALES" />}</Route>
       <Route path="/sales/orders">{(params) => <ProtectedRoute component={SalesOrders} role="SALES" />}</Route>
       <Route path="/sales/commissions">{(params) => <ProtectedRoute component={SalesCommissions} role="SALES" />}</Route>
+
+      {/* Shared Protected Routes */}
+      <Route path="/clients/:id">{(params) => <ProtectedRoute component={ClientProfile} role={["ADMIN", "DISTRIBUTOR", "SALES"]} />}</Route>
 
       <Route path="/">
         {() => {

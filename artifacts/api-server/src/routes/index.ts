@@ -7,6 +7,7 @@ import ordersRouter from "./orders";
 import commissionsRouter from "./commissions";
 import dashboardRouter from "./dashboard";
 import settingsRouter from "./settings";
+import packagesRouter from "./packages";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use("/orders", ordersRouter);
 router.use("/commissions", commissionsRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/settings", settingsRouter);
+router.use("/packages", packagesRouter);
 
 export default router;

@@ -13,6 +13,10 @@ export interface Order {
   /** @nullable */
   clientName?: string | null;
   /** @nullable */
+  packageId?: number | null;
+  /** @nullable */
+  packageName?: string | null;
+  /** @nullable */
   salesId?: number | null;
   /** @nullable */
   salesName?: string | null;
@@ -22,6 +26,10 @@ export interface Order {
   distributorName?: string | null;
   orderName: string;
   amount: number;
+  vatAmount: number;
+  /** @nullable */
+  receiptNumber?: string | null;
+  isFullyCollected: boolean;
   orderDate: Date;
   status: OrderStatus;
   createdAt: Date;

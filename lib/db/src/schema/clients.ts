@@ -4,11 +4,24 @@ import {
   serial,
   timestamp,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const clientsTable = pgTable("clients", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  taxCardNumber: text("tax_card_number").unique().notNull(),
+  taxCardName: text("tax_card_name").notNull(),
+  issuingAuthority: text("issuing_authority").notNull(),
+  commercialRegistryNumber: text("commercial_registry_number").notNull(),
+  businessType: text("business_type").notNull(),
+  email: text("email").notNull(),
+  phone1: text("phone1").notNull(),
+  phone1WhatsApp: boolean("phone1_whatsapp").notNull().default(false),
+  phone2: text("phone2"),
+  phone2WhatsApp: boolean("phone2_whatsapp").notNull().default(false),
+  nationalId: text("national_id").notNull(),
+  address: text("address").notNull(),
   assignedSalesId: integer("assigned_sales_id").notNull(),
   assignedDistributorId: integer("assigned_distributor_id").notNull(),
   ownershipStartDate: timestamp("ownership_start_date", { withTimezone: true })

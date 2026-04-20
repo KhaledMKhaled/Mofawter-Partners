@@ -15,6 +15,7 @@ tags:
   - name: commissions
   - name: dashboard
   - name: settings
+  - name: packages
 paths:
   /healthz:
     get:
@@ -128,6 +129,67 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Client" }
 
+  /clients/lookup:
+    get:
+      operationId: lookupClient
+      tags: [clients]
+      parameters:
+        - name: taxCardNumber
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Client lookup result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClientLookupResult" }
+
+  /clients/{id}:
+    get:
+      operationId: getClientProfile
+      tags: [clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Client Profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client360Profile" }
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    patch:
+      operationId: updateClient
+      tags: [clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateClientRequest" }
+      responses:
+        "200":
+          description: Client updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /clients/{id}/assignment:
     patch:
       operationId: reassignClient
@@ -191,6 +253,70 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /packages:
+    get:
+      operationId: listPackages
+      tags: [packages]
+      responses:
+        "200":
+          description: Packages
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Package" }
+    post:
+      operationId: createPackage
+      tags: [packages]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreatePackageRequest" }
+      responses:
+        "201":
+          description: Package created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Package" }
+
+  /packages/{id}:
+    patch:
+      operationId: updatePackage
+      tags: [packages]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdatePackageRequest" }
+      responses:
+        "200":
+          description: Package updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Package" }
+        "404":
+          description: Package not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    delete:
+      operationId: deletePackage
+      tags: [packages]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Package deleted
 
   /orders:
     get:
@@ -398,15 +524,89 @@ components:
 
     Client:
       type: object
-      required: [id, name, assignedSalesId, assignedDistributorId, ownershipStartDate, ownershipEndDate, createdAt]
+      required: [
+        id, name, taxCardNumber, taxCardName, issuingAuthority, 
+        commercialRegistryNumber, businessType, email, phone1, 
+        phone1WhatsApp, nationalId, address, assignedSalesId, 
+        assignedDistributorId, ownershipStartDate, ownershipEndDate, createdAt
+      ]
       properties:
         id: { type: integer }
         name: { type: string }
+        taxCardNumber: { type: string }
+        taxCardName: { type: string }
+        issuingAuthority: { type: string }
+        commercialRegistryNumber: { type: string }
+        businessType: { type: string }
+        email: { type: string }
+        phone1: { type: string }
+        phone1WhatsApp: { type: boolean }
+        phone2: { type: ["string", "null"] }
+        phone2WhatsApp: { type: boolean }
+        nationalId: { type: string }
+        address: { type: string }
         assignedSalesId: { type: integer }
         assignedDistributorId: { type: integer }
         ownershipStartDate: { type: string, format: date-time }
         ownershipEndDate: { type: string, format: date-time }
         createdAt: { type: string, format: date-time }
+
+    UpdateClientRequest:
+      type: object
+      properties:
+        name: { type: string }
+        taxCardNumber: { type: string }
+        taxCardName: { type: string }
+        issuingAuthority: { type: string }
+        commercialRegistryNumber: { type: string }
+        businessType: { type: string }
+        email: { type: string }
+        phone1: { type: string }
+        phone1WhatsApp: { type: boolean }
+        phone2: { type: ["string", "null"] }
+        phone2WhatsApp: { type: boolean }
+        nationalId: { type: string }
+        address: { type: string }
+
+    CreateClientRequest:
+      type: object
+      required: [
+        name, taxCardNumber, taxCardName, issuingAuthority, 
+        commercialRegistryNumber, businessType, email, phone1, 
+        phone1WhatsApp, nationalId, address
+      ]
+      properties:
+        name: { type: string }
+        taxCardNumber: { type: string }
+        taxCardName: { type: string }
+        issuingAuthority: { type: string }
+        commercialRegistryNumber: { type: string }
+        businessType: { type: string }
+        email: { type: string }
+        phone1: { type: string }
+        phone1WhatsApp: { type: boolean }
+        phone2: { type: ["string", "null"] }
+        phone2WhatsApp: { type: boolean }
+        nationalId: { type: string }
+        address: { type: string }
+        assignedSalesId: { type: ["integer", "null"] }
+
+    ClientLookupResult:
+      type: object
+      required: [found]
+      properties:
+        found: { type: boolean }
+        client: { $ref: "#/components/schemas/Client" }
+        hasPendingOrder: { type: boolean }
+
+    Client360Profile:
+      type: object
+      required: [client, orders]
+      properties:
+        client: { $ref: "#/components/schemas/Client" }
+        orders: 
+          type: array
+          items: { $ref: "#/components/schemas/Order" }
 
     ReassignClientRequest:
       type: object
@@ -432,12 +632,32 @@ components:
         changedByName: { type: ["string", "null"] }
         createdAt: { type: string, format: date-time }
 
-    CreateClientRequest:
+    Package:
       type: object
-      required: [name]
+      required: [id, name, price, vatPct, isActive, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        price: { type: number }
+        vatPct: { type: number }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    CreatePackageRequest:
+      type: object
+      required: [name, price, vatPct]
       properties:
         name: { type: string }
-        assignedSalesId: { type: ["integer", "null"] }
+        price: { type: number }
+        vatPct: { type: number }
+
+    UpdatePackageRequest:
+      type: object
+      properties:
+        name: { type: string }
+        price: { type: number }
+        vatPct: { type: number }
+        isActive: { type: boolean }
 
     OrderStatus:
       type: string
@@ -445,28 +665,34 @@ components:
 
     Order:
       type: object
-      required: [id, clientId, orderName, amount, orderDate, status, createdAt]
+      required: [id, clientId, orderName, amount, vatAmount, isFullyCollected, orderDate, status, createdAt]
       properties:
         id: { type: integer }
         clientId: { type: integer }
         clientName: { type: ["string", "null"] }
+        packageId: { type: ["integer", "null"] }
+        packageName: { type: ["string", "null"] }
         salesId: { type: ["integer", "null"] }
         salesName: { type: ["string", "null"] }
         distributorId: { type: ["integer", "null"] }
         distributorName: { type: ["string", "null"] }
         orderName: { type: string }
         amount: { type: number }
+        vatAmount: { type: number }
+        receiptNumber: { type: ["string", "null"] }
+        isFullyCollected: { type: boolean }
         orderDate: { type: string, format: date-time }
         status: { $ref: "#/components/schemas/OrderStatus" }
         createdAt: { type: string, format: date-time }
 
     CreateOrderRequest:
       type: object
-      required: [clientId, orderName, amount]
+      required: [clientId, packageId, isFullyCollected]
       properties:
         clientId: { type: integer }
-        orderName: { type: string }
-        amount: { type: number }
+        packageId: { type: integer }
+        receiptNumber: { type: ["string", "null"] }
+        isFullyCollected: { type: boolean }
 
     UpdateOrderStatusRequest:
       type: object

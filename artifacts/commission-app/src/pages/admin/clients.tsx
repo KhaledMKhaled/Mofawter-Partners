@@ -14,6 +14,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { UserSquare2, ArrowRightLeft, History } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -169,7 +170,15 @@ export default function AdminClients() {
                   return (
                     <TableRow key={client.id}>
                       <TableCell className="font-medium">
-                        {client.name}
+                        <Link
+                          to={`/clients/${client.id}`}
+                          className="text-primary hover:underline"
+                        >
+                          {client.name}
+                        </Link>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                          {client.taxCardNumber}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {sales?.name ?? `#${client.assignedSalesId}`}

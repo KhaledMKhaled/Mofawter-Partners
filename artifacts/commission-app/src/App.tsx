@@ -18,6 +18,8 @@ import AdminSettings from "@/pages/admin/settings";
 // Distributor Pages
 import DistributorDashboard from "@/pages/distributor/dashboard";
 import DistributorTeam from "@/pages/distributor/team";
+import DistributorClients from "@/pages/distributor/clients";
+import DistributorOrders from "@/pages/distributor/orders";
 import DistributorCommissions from "@/pages/distributor/commissions";
 
 // Sales Pages
@@ -80,6 +82,8 @@ function Router() {
       {/* Distributor Routes */}
       <Route path="/distributor">{(params) => <ProtectedRoute component={DistributorDashboard} role="DISTRIBUTOR" />}</Route>
       <Route path="/distributor/team">{(params) => <ProtectedRoute component={DistributorTeam} role="DISTRIBUTOR" />}</Route>
+      <Route path="/distributor/clients">{(params) => <ProtectedRoute component={DistributorClients} role="DISTRIBUTOR" />}</Route>
+      <Route path="/distributor/orders">{(params) => <ProtectedRoute component={DistributorOrders} role="DISTRIBUTOR" />}</Route>
       <Route path="/distributor/commissions">{(params) => <ProtectedRoute component={DistributorCommissions} role="DISTRIBUTOR" />}</Route>
 
       {/* Sales Routes */}

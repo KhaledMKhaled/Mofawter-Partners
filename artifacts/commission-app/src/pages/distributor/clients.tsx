@@ -1,8 +1,8 @@
 import {
   useListClients,
-} from "@workspace/api-client-react"
+} from "@workspace/api-client-react";
 import { format, parseISO, differenceInDays } from "date-fns";
-import { UserSquare2, Plus } from "lucide-react";
+import { UserSquare2 } from "lucide-react";
 import { Link } from "wouter";
 
 import {
@@ -16,15 +16,15 @@ import {
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Empty } from "@/components/ui/empty";
 
-export default function SalesClients() {
+export default function DistributorClients() {
   const { data: clients, isLoading } = useListClients();
 
   if (isLoading) {
@@ -37,7 +37,7 @@ export default function SalesClients() {
         <Card>
           <CardContent className="p-0">
             <div className="p-4 space-y-4">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           </CardContent>
         </Card>
@@ -47,32 +47,26 @@ export default function SalesClients() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">My Clients</h2>
-          <p className="text-muted-foreground mt-1">
-            Manage your assigned clients and their ownership windows.
-          </p>
-        </div>
-
-        <Button asChild>
-          <Link to="/sales/orders">
-            <Plus className="mr-2 h-4 w-4" />
-            New Client & Order
-          </Link>
-        </Button>
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Team Clients</h2>
+        <p className="text-muted-foreground mt-1">
+          All clients owned by your sales agents, with their 5-year ownership windows.
+        </p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Clients</CardTitle>
+          <CardDescription>
+            Click a client to see their full 360° profile, orders, and commissions.
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {!clients || clients.length === 0 ? (
-            <Empty 
+            <Empty
               icon={UserSquare2}
-              title="No clients"
-              description="Client creation is now unified with Order creation."
+              title="No clients yet"
+              description="Clients added by your sales agents will appear here."
               className="py-12"
             />
           ) : (
@@ -81,6 +75,7 @@ export default function SalesClients() {
                 <TableRow>
                   <TableHead>Tax Card</TableHead>
                   <TableHead>Client Name</TableHead>
+                  <TableHead>Sales Agent</TableHead>
                   <TableHead>Ownership Started</TableHead>
                   <TableHead>Ownership Ends</TableHead>
                   <TableHead>Status</TableHead>
@@ -92,22 +87,36 @@ export default function SalesClients() {
                   const today = new Date();
                   const isExpired = endDate < today;
                   const daysRemaining = differenceInDays(endDate, today);
-
                   return (
                     <TableRow key={client.id}>
-                      <TableCell className="font-mono text-sm">{client.taxCardNumber}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {client.taxCardNumber}
+                      </TableCell>
                       <TableCell className="font-medium">
-                        <Link to={`/clients/${client.id}`} className="text-primary hover:underline">
+                        <Link
+                          to={`/clients/${client.id}`}
+                          className="text-primary hover:underline"
+                        >
                           {client.name}
                         </Link>
                       </TableCell>
-                      <TableCell>{format(parseISO(client.ownershipStartDate), 'MMM d, yyyy')}</TableCell>
-                      <TableCell>{format(endDate, 'MMM d, yyyy')}</TableCell>
+                      <TableCell className="text-muted-foreground">
+                        #{client.assignedSalesId}
+                      </TableCell>
+                      <TableCell>
+                        {format(parseISO(client.ownershipStartDate), "MMM d, yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        {format(endDate, "MMM d, yyyy")}
+                      </TableCell>
                       <TableCell>
                         {isExpired ? (
-                          <Badge variant="destructive">Ownership expired</Badge>
+                          <Badge variant="destructive">Expired</Badge>
                         ) : (
-                          <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">
+                          <Badge
+                            variant="secondary"
+                            className="bg-blue-100 text-blue-800 hover:bg-blue-100"
+                          >
                             {daysRemaining} days remaining
                           </Badge>
                         )}

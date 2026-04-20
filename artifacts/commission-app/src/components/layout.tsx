@@ -53,6 +53,8 @@ export default function Layout({ children, user }: LayoutProps) {
   const distributorLinks = [
     { title: "Dashboard", url: "/distributor", icon: LayoutDashboard },
     { title: "Team", url: "/distributor/team", icon: Users2 },
+    { title: "Clients", url: "/distributor/clients", icon: UserSquare2 },
+    { title: "Orders", url: "/distributor/orders", icon: ShoppingCart },
     { title: "Commissions", url: "/distributor/commissions", icon: DollarSign },
   ];
 

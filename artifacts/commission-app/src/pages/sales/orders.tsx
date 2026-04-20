@@ -5,6 +5,7 @@ import {
 } from "@workspace/api-client-react"
 import { format, parseISO } from "date-fns";
 import { ShoppingCart, Plus } from "lucide-react";
+import { Link } from "wouter";
 
 import {
   Table,
@@ -98,7 +99,14 @@ export default function SalesOrders() {
                       {format(parseISO(order.createdAt), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="font-medium">{order.orderName}</TableCell>
-                    <TableCell>{order.clientName}</TableCell>
+                    <TableCell>
+                      <Link
+                        to={`/clients/${order.clientId}`}
+                        className="text-primary hover:underline"
+                      >
+                        {order.clientName}
+                      </Link>
+                    </TableCell>
                     <TableCell className="text-right">
                       ${order.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>

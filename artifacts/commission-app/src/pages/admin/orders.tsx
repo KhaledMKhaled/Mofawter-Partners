@@ -10,6 +10,7 @@ import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays, parseISO } from "date-fns";
 import { CheckCircle2, Clock, Info, ShoppingCart } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -142,7 +143,12 @@ export default function AdminOrders() {
                       <div className="text-xs text-muted-foreground font-mono mt-0.5">#{order.id}</div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-medium">{order.clientName}</div>
+                      <Link
+                        to={`/clients/${order.clientId}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {order.clientName}
+                      </Link>
                     </TableCell>
                     <TableCell>{order.salesName}</TableCell>
                     <TableCell>{order.distributorName || "None"}</TableCell>

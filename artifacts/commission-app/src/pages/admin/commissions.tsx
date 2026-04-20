@@ -394,7 +394,7 @@ export default function AdminCommissions() {
                         ) : null}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {commission.userName}
+                        {commission.userName || "Unknown User"}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs font-normal">
@@ -403,13 +403,13 @@ export default function AdminCommissions() {
                       </TableCell>
                       <TableCell>
                         <div className="font-medium text-foreground">
-                          {commission.orderName}
+                          {commission.orderName || "Unknown Order"}
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Order #{commission.orderId}
                         </div>
                       </TableCell>
-                      <TableCell>{commission.clientName}</TableCell>
+                      <TableCell>{commission.clientName || "Unknown Client"}</TableCell>
                       <TableCell>
                         {format(parseISO(commission.createdAt), "MMM d, yyyy")}
                       </TableCell>
@@ -426,18 +426,22 @@ export default function AdminCommissions() {
                               <CheckCircle2 className="mr-1 h-3 w-3" />
                               Paid
                             </Badge>
-                            {commission.paidAt && (
-                              <div
-                                className="text-xs text-muted-foreground"
-                                data-testid={`text-paid-info-${commission.id}`}
-                              >
-                                Paid on{" "}
-                                {format(parseISO(commission.paidAt), "MMM d, yyyy")}
-                                {commission.paidByName
-                                  ? ` by ${commission.paidByName}`
-                                  : ""}
-                              </div>
-                            )}
+                            <div
+                              className="text-xs text-muted-foreground"
+                              data-testid={`text-paid-info-${commission.id}`}
+                            >
+                              {commission.paidAt ? (
+                                <>
+                                  Paid on{" "}
+                                  {format(parseISO(commission.paidAt), "MMM d, yyyy")}
+                                </>
+                              ) : (
+                                "Paid (date unavailable)"
+                              )}
+                              {commission.paidByName
+                                ? ` by ${commission.paidByName}`
+                                : ""}
+                            </div>
                           </div>
                         ) : (
                           <Badge

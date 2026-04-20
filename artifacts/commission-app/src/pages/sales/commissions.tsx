@@ -1,4 +1,4 @@
-import { useListCommissions, getListCommissionsQueryKey } from "@workspace/api-client-react";
+import { useListCommissions } from "@workspace/api-client-react";
 import { format, parseISO } from "date-fns";
 import {
   Table,
@@ -113,20 +113,28 @@ export default function SalesCommissions() {
                     <TableCell className="whitespace-nowrap">
                       {format(parseISO(commission.createdAt), 'MMM d, yyyy')}
                     </TableCell>
-                    <TableCell className="font-medium">{commission.orderName}</TableCell>
+                    <TableCell className="font-medium">
+                      {commission.orderName || "Unknown Order"}
+                    </TableCell>
                     <TableCell>{commission.clientName || 'Unknown Client'}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <Badge variant={commission.status === "PAID" ? "default" : "secondary"} className={commission.status === "PAID" ? "bg-green-100 text-green-800 hover:bg-green-100 w-fit" : "w-fit"}>
                           {commission.status}
                         </Badge>
-                        {commission.status === "PAID" && commission.paidAt && (
+                        {commission.status === "PAID" && (
                           <div
                             className="text-xs text-muted-foreground"
                             data-testid={`text-paid-info-${commission.id}`}
                           >
-                            Paid on{" "}
-                            {format(parseISO(commission.paidAt), "MMM d, yyyy")}
+                            {commission.paidAt ? (
+                              <>
+                                Paid on{" "}
+                                {format(parseISO(commission.paidAt), "MMM d, yyyy")}
+                              </>
+                            ) : (
+                              "Paid (date unavailable)"
+                            )}
                             {commission.paidByName ? ` by ${commission.paidByName}` : ""}
                           </div>
                         )}

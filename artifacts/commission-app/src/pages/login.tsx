@@ -78,7 +78,7 @@ export default function Login() {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4 shadow-lg shadow-primary/20">
             <Briefcase className="h-6 w-6" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">CommissionHQ</h1>
+          <h1 className="text-3xl font-bold tracking-tight">MofawterPartners</h1>
           <p className="text-muted-foreground text-sm max-w-sm">
             Sign in to manage sales, team performance, and commissions.
           </p>

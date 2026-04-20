@@ -78,7 +78,7 @@ export default function Layout({ children, user }: LayoutProps) {
               <Briefcase className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold leading-none tracking-tight">CommissionHQ</span>
+              <span className="font-semibold leading-none tracking-tight">MofawterPartners</span>
             </div>
           </SidebarHeader>
           <SidebarContent>

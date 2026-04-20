@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Commission Manager"
+title = "MofawterPartners"
 version = "1.0.0"
 id = "artifacts/commission-app"
 router = "path"

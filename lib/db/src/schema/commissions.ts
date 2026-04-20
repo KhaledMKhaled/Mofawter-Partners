@@ -20,6 +20,7 @@ export const commissionsTable = pgTable("commissions", {
     .notNull()
     .defaultNow(),
   paidAt: timestamp("paid_at", { withTimezone: true }),
+  paidByUserId: integer("paid_by_user_id"),
 });
 
 export type Commission = typeof commissionsTable.$inferSelect;

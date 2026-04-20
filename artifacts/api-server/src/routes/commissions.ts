@@ -6,7 +6,7 @@ import {
   clientsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -24,6 +24,8 @@ type EnrichedCommission = {
   status: "UNPAID" | "PAID";
   createdAt: string;
   paidAt: string | null;
+  paidByUserId: number | null;
+  paidByName: string | null;
 };
 
 async function enrich(
@@ -31,7 +33,14 @@ async function enrich(
 ): Promise<EnrichedCommission[]> {
   if (rows.length === 0) return [];
   const orderIds = [...new Set(rows.map((c) => c.orderId))];
-  const userIds = [...new Set(rows.map((c) => c.userId))];
+  const userIds = [
+    ...new Set([
+      ...rows.map((c) => c.userId),
+      ...rows
+        .map((c) => c.paidByUserId)
+        .filter((v): v is number => v !== null && v !== undefined),
+    ]),
+  ];
   const orders = (
     await Promise.all(
       orderIds.map((id) =>
@@ -62,6 +71,7 @@ async function enrich(
     const order = orderMap.get(c.orderId);
     const client = order ? clientMap.get(order.clientId) : undefined;
     const user = userMap.get(c.userId);
+    const paidBy = c.paidByUserId ? userMap.get(c.paidByUserId) : undefined;
     return {
       id: c.id,
       orderId: c.orderId,
@@ -74,6 +84,8 @@ async function enrich(
       status: c.status,
       createdAt: c.createdAt.toISOString(),
       paidAt: c.paidAt ? c.paidAt.toISOString() : null,
+      paidByUserId: c.paidByUserId ?? null,
+      paidByName: paidBy?.name ?? null,
     };
   });
 }
@@ -109,7 +121,7 @@ router.get("/", async (req, res) => {
 });
 
 router.patch("/:id/status", async (req, res) => {
-  const { role } = req.auth!;
+  const { role, sub } = req.auth!;
   if (role !== "ADMIN") {
     res.status(403).json({ error: "Only admins can update commission status" });
     return;
@@ -128,10 +140,17 @@ router.patch("/:id/status", async (req, res) => {
     res.status(404).json({ error: "Commission not found" });
     return;
   }
-  await db
-    .update(commissionsTable)
-    .set({ status, paidAt: status === "PAID" ? new Date() : null })
-    .where(eq(commissionsTable.id, id));
+  if (status === "PAID" && existing.status !== "PAID") {
+    await db
+      .update(commissionsTable)
+      .set({ status: "PAID", paidAt: new Date(), paidByUserId: sub })
+      .where(eq(commissionsTable.id, id));
+  } else if (status === "UNPAID" && existing.status !== "UNPAID") {
+    await db
+      .update(commissionsTable)
+      .set({ status: "UNPAID", paidAt: null, paidByUserId: null })
+      .where(eq(commissionsTable.id, id));
+  }
   const [refreshed] = await db
     .select()
     .from(commissionsTable)
@@ -141,7 +160,7 @@ router.patch("/:id/status", async (req, res) => {
 });
 
 router.post("/mark-paid", async (req, res) => {
-  const { role } = req.auth!;
+  const { role, sub } = req.auth!;
   if (role !== "ADMIN") {
     res.status(403).json({ error: "Only admins can mark commissions paid" });
     return;
@@ -158,8 +177,13 @@ router.post("/mark-paid", async (req, res) => {
   }
   await db
     .update(commissionsTable)
-    .set({ status: "PAID", paidAt: new Date() })
-    .where(inArray(commissionsTable.id, numericIds));
+    .set({ status: "PAID", paidAt: new Date(), paidByUserId: sub })
+    .where(
+      and(
+        inArray(commissionsTable.id, numericIds),
+        eq(commissionsTable.status, "UNPAID"),
+      ),
+    );
   const updated = await db
     .select()
     .from(commissionsTable)

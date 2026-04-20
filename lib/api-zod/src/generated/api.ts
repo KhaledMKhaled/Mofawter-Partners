@@ -177,6 +177,8 @@ export const ListCommissionsResponseItem = zod.object({
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
   paidAt: zod.coerce.date().nullish(),
+  paidByUserId: zod.number().nullish(),
+  paidByName: zod.string().nullish(),
 });
 export const ListCommissionsResponse = zod.array(ListCommissionsResponseItem);
 
@@ -200,6 +202,8 @@ export const UpdateCommissionStatusResponse = zod.object({
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
   paidAt: zod.coerce.date().nullish(),
+  paidByUserId: zod.number().nullish(),
+  paidByName: zod.string().nullish(),
 });
 
 export const MarkCommissionsPaidBody = zod.object({
@@ -218,6 +222,8 @@ export const MarkCommissionsPaidResponseItem = zod.object({
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
   paidAt: zod.coerce.date().nullish(),
+  paidByUserId: zod.number().nullish(),
+  paidByName: zod.string().nullish(),
 });
 export const MarkCommissionsPaidResponse = zod.array(
   MarkCommissionsPaidResponseItem,
@@ -261,6 +267,8 @@ export const GetDashboardSummaryResponse = zod.object({
       status: zod.enum(["UNPAID", "PAID"]),
       createdAt: zod.coerce.date(),
       paidAt: zod.coerce.date().nullish(),
+      paidByUserId: zod.number().nullish(),
+      paidByName: zod.string().nullish(),
     }),
   ),
 });

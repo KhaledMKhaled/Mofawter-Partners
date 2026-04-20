@@ -118,6 +118,7 @@ export default function AdminCommissions() {
       "Amount",
       "Status",
       "Paid At",
+      "Paid By",
     ];
     const rows = filtered.map((c) => [
       c.userName ?? "",
@@ -129,6 +130,7 @@ export default function AdminCommissions() {
       c.amount.toFixed(2),
       c.status,
       c.paidAt ? format(parseISO(c.paidAt), "yyyy-MM-dd HH:mm:ss") : "",
+      c.paidByName ?? "",
     ]);
     const csv = [headers, ...rows]
       .map((row) => row.map(csvEscape).join(","))
@@ -416,13 +418,27 @@ export default function AdminCommissions() {
                       </TableCell>
                       <TableCell>
                         {commission.status === "PAID" ? (
-                          <Badge
-                            variant="outline"
-                            className="bg-green-50 text-green-700 border-green-200"
-                          >
-                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                            Paid
-                          </Badge>
+                          <div className="flex flex-col gap-1">
+                            <Badge
+                              variant="outline"
+                              className="bg-green-50 text-green-700 border-green-200 w-fit"
+                            >
+                              <CheckCircle2 className="mr-1 h-3 w-3" />
+                              Paid
+                            </Badge>
+                            {commission.paidAt && (
+                              <div
+                                className="text-xs text-muted-foreground"
+                                data-testid={`text-paid-info-${commission.id}`}
+                              >
+                                Paid on{" "}
+                                {format(parseISO(commission.paidAt), "MMM d, yyyy")}
+                                {commission.paidByName
+                                  ? ` by ${commission.paidByName}`
+                                  : ""}
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <Badge
                             variant="outline"

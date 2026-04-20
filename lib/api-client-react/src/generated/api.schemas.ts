@@ -178,6 +178,10 @@ export interface Commission {
   createdAt: string;
   /** @nullable */
   paidAt?: string | null;
+  /** @nullable */
+  paidByUserId?: number | null;
+  /** @nullable */
+  paidByName?: string | null;
 }
 
 export interface DashboardSummary {

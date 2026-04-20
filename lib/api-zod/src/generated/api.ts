@@ -206,7 +206,7 @@ export const GetClientProfileResponse = zod.object({
       receiptNumber: zod.string().nullish(),
       isFullyCollected: zod.boolean(),
       orderDate: zod.coerce.date(),
-      status: zod.enum(["PENDING", "COMPLETED"]),
+      status: zod.enum(["NEW","UNDER_REVIEW","APPROVED","REJECTED","IN_EXECUTION","EXECUTED","COLLECTED","COMMISSION_PENDING","COMMISSION_READY","COMMISSION_PAID","CANCELLED"]),
       createdAt: zod.coerce.date(),
     }),
   ),
@@ -421,7 +421,7 @@ export const ListOrdersResponseItem = zod.object({
   receiptNumber: zod.string().nullish(),
   isFullyCollected: zod.boolean(),
   orderDate: zod.coerce.date(),
-  status: zod.enum(["PENDING", "COMPLETED"]),
+  status: zod.enum(["NEW","UNDER_REVIEW","APPROVED","REJECTED","IN_EXECUTION","EXECUTED","COLLECTED","COMMISSION_PENDING","COMMISSION_READY","COMMISSION_PAID","CANCELLED"]),
   createdAt: zod.coerce.date(),
 });
 export const ListOrdersResponse = zod.array(ListOrdersResponseItem);
@@ -474,7 +474,7 @@ export const UpdateOrderStatusParams = zod.object({
 });
 
 export const UpdateOrderStatusBody = zod.object({
-  status: zod.enum(["PENDING", "COMPLETED"]),
+  status: zod.enum(["NEW","UNDER_REVIEW","APPROVED","REJECTED","IN_EXECUTION","EXECUTED","COLLECTED","COMMISSION_PENDING","COMMISSION_READY","COMMISSION_PAID","CANCELLED"]),
 });
 
 export const UpdateOrderStatusResponse = zod.object({
@@ -493,7 +493,7 @@ export const UpdateOrderStatusResponse = zod.object({
   receiptNumber: zod.string().nullish(),
   isFullyCollected: zod.boolean(),
   orderDate: zod.coerce.date(),
-  status: zod.enum(["PENDING", "COMPLETED"]),
+  status: zod.enum(["NEW","UNDER_REVIEW","APPROVED","REJECTED","IN_EXECUTION","EXECUTED","COLLECTED","COMMISSION_PENDING","COMMISSION_READY","COMMISSION_PAID","CANCELLED"]),
   createdAt: zod.coerce.date(),
 });
 
@@ -587,7 +587,7 @@ export const GetDashboardSummaryResponse = zod.object({
       receiptNumber: zod.string().nullish(),
       isFullyCollected: zod.boolean(),
       orderDate: zod.coerce.date(),
-      status: zod.enum(["PENDING", "COMPLETED"]),
+      status: zod.enum(["NEW","UNDER_REVIEW","APPROVED","REJECTED","IN_EXECUTION","EXECUTED","COLLECTED","COMMISSION_PENDING","COMMISSION_READY","COMMISSION_PAID","CANCELLED"]),
       createdAt: zod.coerce.date(),
     }),
   ),

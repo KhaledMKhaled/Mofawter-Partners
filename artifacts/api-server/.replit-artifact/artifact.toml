@@ -7,23 +7,16 @@ id = "3B4_FFSkEVBkAeYMFRJ2e"
 [[services]]
 localPort = 8080
 name = "API Server"
-paths = ["/api"]
+paths = ["/"]
 
 [services.development]
 run = "pnpm --filter @workspace/api-server run dev"
 
 [services.production]
+build = "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public"
+run = "node --enable-source-maps artifacts/api-server/dist/index.mjs"
 
-[services.production.build]
-args = ["bash", "-lc", "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public"]
-
-[services.production.build.env]
-NODE_ENV = "production"
-
-[services.production.run]
-args = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
-
-[services.production.run.env]
+[services.production.env]
 NODE_ENV = "production"
 
 [services.production.health.startup]

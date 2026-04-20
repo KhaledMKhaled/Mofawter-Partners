@@ -259,7 +259,7 @@ export default function ClientProfile() {
                         <TableCell className="whitespace-nowrap">{formatCurrency(o.vatAmount, locale)}</TableCell>
                         <TableCell><span dir="ltr">{o.receiptNumber || '-'}</span></TableCell>
                         <TableCell>
-                          <Badge variant={o.status === "COMPLETED" || o.status === "COLLECTED" ? "default" : "secondary"} className={o.status === "COMPLETED" || o.status === "COLLECTED" ? "bg-green-100 text-green-800" : ""}>
+                          <Badge variant={(o.status as string) === "COLLECTED" ? "default" : "secondary"} className={(o.status as string) === "COLLECTED" ? "bg-green-100 text-green-800" : ""}>
                             {t.orderStatus[o.status as keyof typeof t.orderStatus] ?? o.status}
                           </Badge>
                         </TableCell>

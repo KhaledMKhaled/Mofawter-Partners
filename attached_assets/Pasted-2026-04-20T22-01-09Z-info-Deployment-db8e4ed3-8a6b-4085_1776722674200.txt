@@ -1,0 +1,148 @@
+2026-04-20T22:01:09Z info: Deployment: db8e4ed3-8a6b-4085-9646-eb3ec8436f32
+2026-04-20T22:01:09Z info: Build: d160b086-c0a0-45f8-96db-dc63cc564ad3
+2026-04-20T22:01:09Z info: Running Security Scan
+2026-04-20T22:01:16Z info: Security Scan Complete
+2026-04-20T22:01:18Z info: Installing packages
+--> pnpm install
+
+Scope: all 9 workspace projects
+
+Lockfile is up to date, resolution step is skipped
+
+Progress: resolved 1, reused 0, downloaded 0, added 0
+
+Packages: +3
++++
+
+
+   ╭──────────────────────────────────────────╮
+   │                                          │
+   │   Update available! 10.26.1 → 10.33.0.   │
+   │   Changelog: https://pnpm.io/v/10.33.0   │
+   │     To update, run: pnpm add -g pnpm     │
+   │                                          │
+   ╰──────────────────────────────────────────╯
+
+
+Progress: resolved 3, reused 0, downloaded 3, added 3, done
+
+
+devDependencies:
++ @rollup/rollup-win32-x64-msvc 4.60.2
++ @tailwindcss/oxide-win32-x64-msvc 4.2.2
++ lightningcss-win32-x64-msvc 1.32.0
+
+
+Done in 2.8s using pnpm v10.26.1
+
+2026-04-20T22:01:21Z info: Starting Build
+
+> workspace@0.0.0 build /home/runner/workspace
+> pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public
+
+
+
+> @workspace/commission-app@0.0.0 build /home/runner/workspace/artifacts/commission-app
+> vite build --config vite.config.ts
+
+
+vite v7.3.2 building client environment for production...
+
+transforming...
+
+src/components/ui/tooltip.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+src/components/ui/avatar.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+src/components/ui/label.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+src/components/ui/sidebar.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+src/components/ui/select.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+src/components/ui/sheet.tsx (2:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+
+✓ 2189 modules transformed.
+
+rendering chunks...
+
+computing gzip size...
+
+dist/public/index.html                   0.74 kB │ gzip:   0.41 kB
+
+dist/public/assets/index-BreW7NJD.css  112.82 kB │ gzip:  18.69 kB
+dist/public/assets/index-iagVbfl-.js   727.82 kB │ gzip: 207.57 kB
+✓ built in 4.17s
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+
+> @workspace/api-server@0.0.0 build /home/runner/workspace/artifacts/api-server
+> node ./build.mjs
+
+
+
+  dist/index.mjs                       2.0mb ⚠️
+  dist/pino-worker.mjs               153.4kb
+  dist/pino-file.mjs                 142.1kb
+  dist/pino-pretty.mjs               114.6kb
+  dist/thread-stream-worker.mjs        7.3kb
+  dist/index.mjs.map                   3.5mb
+  dist/pino-worker.mjs.map           256.9kb
+  dist/pino-file.mjs.map             229.0kb
+  dist/pino-pretty.mjs.map           203.9kb
+  dist/thread-stream-worker.mjs.map   12.0kb
+
+⚡ Done in 355ms
+
+Version 10.26.1 (compiled to binary; bundled Node.js v24.12.0)
+Usage: pnpm [command] [flags]
+       pnpm [ -h | --help | -v | --version ]
+
+These are common pnpm commands used in various situations, use 'pnpm help -a' to list all commands
+
+Manage your dependencies:
+      add                  Installs a package and any packages that it depends
+                           on. By default, any new package is installed as a
+                           prod dependency
+   i, install              Install all dependencies for a project
+  ln, link                 Connect the local project to another one
+  rm, remove               Removes packages from node_modules and from the
+                           project's package.json
+      unlink               Unlinks a package. Like yarn unlink but pnpm
+                           re-installs the dependency after removing the
+                           external link
+  up, update               Updates packages to their latest version based on the
+                           specified range
+
+Review your dependencies:
+      audit                Checks for known security issues with the installed
+                           packages
+  ls, list                 Print all the versions of packages that are
+                           installed, as well as their dependencies, in a
+                           tree-structure
+      outdated             Check for outdated packages
+      why                  Shows all packages that depend on the specified
+                           package
+
+Run your scripts:
+      create               Create a project from a "create-*" or "@foo/create-*"
+                           starter kit
+      dlx                  Fetches a package from the registry without
+                           installing it as a dependency, hot loads it, and runs
+                           whatever default command binary it exposes
+      exec                 Executes a shell command in scope of a project
+      run                  Runs a defined package script
+
+Other:
+   c, config               Manage the pnpm configuration files
+      init                 Create a package.json file
+      publish              Publishes a package to the registry
+      self-update          Updates pnpm to the latest version
+
+Options:
+  -r, --recursive          Run the command for each project in the workspace.

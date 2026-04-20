@@ -1,12 +1,9 @@
 modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
-router = "application"
 deploymentTarget = "autoscale"
-
-[deployment.postBuild]
-args = ["pnpm", "store", "prune"]
-env = { "CI" = "true" }
+build = "pnpm run build"
+run = "node --enable-source-maps artifacts/api-server/dist/index.mjs"
 
 [workflows]
 runButton = "Project"
@@ -21,15 +18,11 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
 externalPort = 80
 
 [[ports]]
-localPort = 8082
-externalPort = 3001
+localPort = 8081
+externalPort = 8081
 
 [[ports]]
 localPort = 21322

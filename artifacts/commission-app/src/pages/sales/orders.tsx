@@ -111,7 +111,7 @@ export default function SalesOrders() {
                       ${order.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={order.status === "COMPLETED" ? "default" : "secondary"} className={order.status === "COMPLETED" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
+                      <Badge variant={(order.status as string) === "COLLECTED" ? "default" : "secondary"} className={(order.status as string) === "COLLECTED" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
                         {order.status}
                       </Badge>
                     </TableCell>

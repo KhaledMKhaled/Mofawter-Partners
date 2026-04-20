@@ -7,46 +7,52 @@ import {
 
 const start = new Date("2025-01-01T00:00:00.000Z");
 const end = new Date("2030-01-01T00:00:00.000Z");
-const rates = { salesPct: 10, distributorPct: 5 };
 
 const baseInput = {
   amount: 1000,
   ownershipStartDate: start,
   ownershipEndDate: end,
+  ownershipStatus: "ACTIVE",
   assignedSalesId: 42,
   assignedDistributorId: 7,
-  rates,
-} as const;
+  clientId: 1,
+  isAdminOverride: false,
+  orderType: "NEW_SUBSCRIPTION" as const,
+  packageId: null,
+  commissionTriggerStatus: "COLLECTED",
+  salesRule: { percentage: 10, ruleId: null },
+  distRule: { percentage: 5, ruleId: null },
+};
 
 describe("isOrderInOwnershipWindow (5-year ownership rule)", () => {
   it("returns true for an order placed comfortably inside the window", () => {
     assert.equal(
-      isOrderInOwnershipWindow(new Date("2027-06-15T12:00:00.000Z"), start, end),
+      isOrderInOwnershipWindow(new Date("2027-06-15T12:00:00.000Z"), start, end, "ACTIVE"),
       true,
     );
   });
 
   it("returns true for an order placed exactly on the start date", () => {
-    assert.equal(isOrderInOwnershipWindow(start, start, end), true);
+    assert.equal(isOrderInOwnershipWindow(start, start, end, "ACTIVE"), true);
   });
 
   it("returns true for an order placed exactly on the end date", () => {
-    assert.equal(isOrderInOwnershipWindow(end, start, end), true);
+    assert.equal(isOrderInOwnershipWindow(end, start, end, "ACTIVE"), true);
   });
 
   it("returns false for an order placed one day before the window starts", () => {
     const oneDayBefore = new Date(start.getTime() - 24 * 60 * 60 * 1000);
-    assert.equal(isOrderInOwnershipWindow(oneDayBefore, start, end), false);
+    assert.equal(isOrderInOwnershipWindow(oneDayBefore, start, end, "ACTIVE"), false);
   });
 
   it("returns false for an order placed one day past the end date", () => {
     const oneDayAfter = new Date(end.getTime() + 24 * 60 * 60 * 1000);
-    assert.equal(isOrderInOwnershipWindow(oneDayAfter, start, end), false);
+    assert.equal(isOrderInOwnershipWindow(oneDayAfter, start, end, "ACTIVE"), false);
   });
 
   it("returns false for an order placed one millisecond past the end date", () => {
     const justAfter = new Date(end.getTime() + 1);
-    assert.equal(isOrderInOwnershipWindow(justAfter, start, end), false);
+    assert.equal(isOrderInOwnershipWindow(justAfter, start, end, "ACTIVE"), false);
   });
 });
 
@@ -54,8 +60,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("creates SALES + DISTRIBUTOR commissions when completed inside the window", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: new Date("2027-06-15T12:00:00.000Z"),
     });
     assert.equal(plan.kind, "create");
@@ -69,8 +75,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("creates commissions when completed exactly on the end date (boundary)", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: end,
     });
     assert.equal(plan.kind, "create");
@@ -81,8 +87,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("creates commissions when completed exactly on the start date (boundary)", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: start,
     });
     assert.equal(plan.kind, "create");
@@ -91,8 +97,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("does NOT create commissions when the order date is one day past the end", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: new Date(end.getTime() + 24 * 60 * 60 * 1000),
     });
     assert.equal(plan.kind, "noop");
@@ -101,8 +107,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("does NOT create commissions when the order date is one day before the start", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: new Date(start.getTime() - 24 * 60 * 60 * 1000),
     });
     assert.equal(plan.kind, "noop");
@@ -111,8 +117,8 @@ describe("planCommissionUpdate — completing an order", () => {
   it("does NOT re-create commissions when an already-completed order is re-completed", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "COMPLETED",
-      newStatus: "COMPLETED",
+      prevStatus: "COLLECTED",
+      newStatus: "COLLECTED",
       orderDate: new Date("2027-06-15T12:00:00.000Z"),
     });
     assert.equal(plan.kind, "noop");
@@ -122,8 +128,8 @@ describe("planCommissionUpdate — completing an order", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
       amount: 333.33,
-      prevStatus: "PENDING",
-      newStatus: "COMPLETED",
+      prevStatus: "NEW",
+      newStatus: "COLLECTED",
       orderDate: new Date("2027-06-15T12:00:00.000Z"),
     });
     assert.equal(plan.kind, "create");
@@ -137,8 +143,8 @@ describe("planCommissionUpdate — reverting an order", () => {
   it("returns delete plan when reverting a COMPLETED order to PENDING", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "COMPLETED",
-      newStatus: "PENDING",
+      prevStatus: "COLLECTED",
+      newStatus: "NEW",
       orderDate: new Date("2027-06-15T12:00:00.000Z"),
     });
     assert.equal(plan.kind, "delete");
@@ -149,8 +155,8 @@ describe("planCommissionUpdate — reverting an order", () => {
     // but reverting should still issue a delete to keep state consistent and idempotent.
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "COMPLETED",
-      newStatus: "PENDING",
+      prevStatus: "COLLECTED",
+      newStatus: "NEW",
       orderDate: new Date(end.getTime() + 24 * 60 * 60 * 1000),
     });
     assert.equal(plan.kind, "delete");
@@ -159,8 +165,8 @@ describe("planCommissionUpdate — reverting an order", () => {
   it("does nothing when a PENDING order is set back to PENDING", () => {
     const plan = planCommissionUpdate({
       ...baseInput,
-      prevStatus: "PENDING",
-      newStatus: "PENDING",
+      prevStatus: "NEW",
+      newStatus: "NEW",
       orderDate: new Date("2027-06-15T12:00:00.000Z"),
     });
     assert.equal(plan.kind, "noop");

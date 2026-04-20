@@ -18,6 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -202,7 +203,16 @@ export default function Layout({ children, user }: LayoutProps) {
         </Sidebar>
 
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background">
-          <div className="flex-1 overflow-y-auto p-8">{children}</div>
+          <header className="md:hidden sticky top-0 z-30 flex items-center gap-2 border-b bg-background/95 backdrop-blur px-3 py-2">
+            <SidebarTrigger />
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
+                <Briefcase className="h-3.5 w-3.5 text-primary-foreground" />
+              </div>
+              <span className="text-sm font-bold">Mofawter <span className="text-primary">Partners</span></span>
+            </div>
+          </header>
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </SidebarProvider>

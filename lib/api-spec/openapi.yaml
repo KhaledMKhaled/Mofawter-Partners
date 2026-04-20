@@ -622,12 +622,48 @@ components:
 
     Client360Profile:
       type: object
-      required: [client, orders]
+      required: [client, orders, commissions, financials, timeline]
       properties:
         client: { $ref: "#/components/schemas/Client" }
         orders: 
           type: array
           items: { $ref: "#/components/schemas/Order" }
+        commissions:
+          type: array
+          items: { $ref: "#/components/schemas/Commission" }
+        financials:
+          $ref: "#/components/schemas/ClientFinancialTotals"
+        timeline:
+          type: array
+          items: { $ref: "#/components/schemas/ClientFinancialTimelineEvent" }
+
+    ClientFinancialTotals:
+      type: object
+      required: [subtotal, vatTotal, collectedTotal, outstandingTotal]
+      properties:
+        subtotal: { type: number }
+        vatTotal: { type: number }
+        collectedTotal: { type: number }
+        outstandingTotal: { type: number }
+
+    ClientFinancialTimelineEventType:
+      type: string
+      enum: [ORDER_CREATED, ORDER_STATUS_CHANGED, COMMISSION_GENERATED, COMMISSION_PAID]
+
+    ClientFinancialTimelineEvent:
+      type: object
+      required: [type, occurredAt, orderId, orderName, commissionId, commissionStatus, amount, details]
+      properties:
+        type: { $ref: "#/components/schemas/ClientFinancialTimelineEventType" }
+        occurredAt: { type: string, format: date-time }
+        orderId: { type: ["integer", "null"] }
+        orderName: { type: ["string", "null"] }
+        commissionId: { type: ["integer", "null"] }
+        commissionStatus:
+          type: ["string", "null"]
+          enum: [UNPAID, PAID, null]
+        amount: { type: ["number", "null"] }
+        details: { type: string }
 
     ReassignClientRequest:
       type: object

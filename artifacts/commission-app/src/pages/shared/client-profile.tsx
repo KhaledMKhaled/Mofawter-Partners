@@ -88,6 +88,7 @@ export default function ClientProfile() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview (360°)</TabsTrigger>
+          <TabsTrigger value="financial">Financial 360</TabsTrigger>
           <TabsTrigger value="orders">Network Orders</TabsTrigger>
           <TabsTrigger value="history">Assignment History</TabsTrigger>
         </TabsList>
@@ -139,6 +140,88 @@ export default function ClientProfile() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="financial" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Subtotal</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-bold">
+                ${Number(profileData.financials?.subtotal ?? 0).toFixed(2)}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">VAT Total</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-bold">
+                ${Number(profileData.financials?.vatTotal ?? 0).toFixed(2)}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Collected</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-bold text-green-700">
+                ${Number(profileData.financials?.collectedTotal ?? 0).toFixed(2)}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding</CardTitle>
+              </CardHeader>
+              <CardContent className="text-2xl font-bold text-amber-700">
+                ${Number(profileData.financials?.outstandingTotal ?? 0).toFixed(2)}
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Financial Timeline</CardTitle>
+              <CardDescription>All monetary events linked to this client.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!profileData.timeline || profileData.timeline.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">No financial activity found.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Event</TableHead>
+                      <TableHead>Reference</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {profileData.timeline.map((item, index) => (
+                      <TableRow key={`${item.type}-${item.orderId ?? "none"}-${item.commissionId ?? "none"}-${index}`}>
+                        <TableCell>{format(parseISO(item.occurredAt), 'MMM d, yyyy p')}</TableCell>
+                        <TableCell className="font-medium">{item.details}</TableCell>
+                        <TableCell>{item.orderName ?? (item.orderId ? `Order #${item.orderId}` : "-")}</TableCell>
+                        <TableCell>
+                          {item.commissionStatus ? (
+                            <Badge variant={item.commissionStatus === "PAID" ? "default" : "secondary"} className={item.commissionStatus === "PAID" ? "bg-green-100 text-green-800" : ""}>
+                              {item.commissionStatus}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {item.amount == null ? "-" : `$${Number(item.amount).toFixed(2)}`}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="orders">

@@ -107,7 +107,7 @@ export default function Layout({ children, user }: LayoutProps) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        <Sidebar className="border-r bg-sidebar">
+        <Sidebar side={locale === "ar" ? "right" : "left"} className="bg-sidebar">
           {/* Brand Header */}
           <SidebarHeader className="border-b border-sidebar-border px-5 py-4">
             <div className="flex items-center gap-3">

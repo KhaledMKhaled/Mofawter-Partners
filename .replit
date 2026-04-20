@@ -1,8 +1,13 @@
 modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
-router = "application"
 deploymentTarget = "autoscale"
+build = [
+  "bash",
+  "-lc",
+  "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public",
+]
+run = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
@@ -21,19 +26,7 @@ timeoutMs = 20000
 
 [[ports]]
 localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
 externalPort = 80
-
-[[ports]]
-localPort = 8082
-externalPort = 3001
-
-[[ports]]
-localPort = 21322
-externalPort = 3000
 
 [nix]
 channel = "stable-25_05"

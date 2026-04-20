@@ -13,6 +13,18 @@ import { requireAuth } from "../middlewares/auth";
 const router: IRouter = Router();
 router.use(requireAuth);
 
+const TAX_CARD_DIGITS_ONLY_REGEX = /^\d+$/;
+const TAX_CARD_DIGITS_ONLY_ERROR = "taxCardNumber must contain digits only";
+
+function normalizeTaxCardNumber(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/\s+/g, "");
+}
+
+function isValidTaxCardNumber(value: string): boolean {
+  return TAX_CARD_DIGITS_ONLY_REGEX.test(value);
+}
+
 function addFiveYears(start: Date): Date {
   const end = new Date(start);
   end.setFullYear(end.getFullYear() + 5);
@@ -45,9 +57,14 @@ function toDto(c: typeof clientsTable.$inferSelect) {
 
 router.get("/lookup", async (req, res, next) => {
   try {
-    const taxCardNumber = req.query.taxCardNumber as string;
+    const taxCardNumber = normalizeTaxCardNumber(req.query.taxCardNumber);
     if (!taxCardNumber) {
       res.status(400).json({ error: "taxCardNumber is required" });;
+      return;
+    }
+
+    if (!isValidTaxCardNumber(taxCardNumber)) {
+      res.status(400).json({ error: TAX_CARD_DIGITS_ONLY_ERROR });
       return;
     }
 
@@ -99,16 +116,23 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res, next) => {
   try {
     const { role, sub } = req.auth!;
-    const { 
-      name, assignedSalesId, 
-      taxCardNumber, taxCardName, issuingAuthority, 
-      commercialRegistryNumber, businessType, email, 
-      phone1, phone1WhatsApp, phone2, phone2WhatsApp, 
-      nationalId, address 
+    const {
+      name, assignedSalesId,
+      taxCardNumber: rawTaxCardNumber, taxCardName, issuingAuthority,
+      commercialRegistryNumber, businessType, email,
+      phone1, phone1WhatsApp, phone2, phone2WhatsApp,
+      nationalId, address
     } = req.body ?? {};
+
+    const taxCardNumber = normalizeTaxCardNumber(rawTaxCardNumber);
 
     if (!name || !taxCardNumber) {
       res.status(400).json({ error: "Name and taxCardNumber are required" });;
+      return;
+    }
+
+    if (!isValidTaxCardNumber(taxCardNumber)) {
+      res.status(400).json({ error: TAX_CARD_DIGITS_ONLY_ERROR });
       return;
     }
 

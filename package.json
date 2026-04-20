@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && pnpm run postbuild",
-    "postbuild": "rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public",
+    "build": "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public",
     "start": "node --enable-source-maps artifacts/api-server/dist/index.mjs",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

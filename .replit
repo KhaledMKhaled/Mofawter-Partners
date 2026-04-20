@@ -2,12 +2,8 @@ modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = ["sh", "-c", "pnpm run build"]
-run = [
-  "sh",
-  "-c",
-  "node --enable-source-maps artifacts/api-server/dist/index.mjs",
-]
+build = "pnpm run build"
+run = "node --enable-source-maps artifacts/api-server/dist/index.mjs"
 
 [workflows]
 runButton = "Project"

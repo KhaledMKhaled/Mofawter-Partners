@@ -116,9 +116,21 @@ export default function SalesCommissions() {
                     <TableCell className="font-medium">{commission.orderName}</TableCell>
                     <TableCell>{commission.clientName || 'Unknown Client'}</TableCell>
                     <TableCell>
-                      <Badge variant={commission.status === "PAID" ? "default" : "secondary"} className={commission.status === "PAID" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""}>
-                        {commission.status}
-                      </Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant={commission.status === "PAID" ? "default" : "secondary"} className={commission.status === "PAID" ? "bg-green-100 text-green-800 hover:bg-green-100 w-fit" : "w-fit"}>
+                          {commission.status}
+                        </Badge>
+                        {commission.status === "PAID" && commission.paidAt && (
+                          <div
+                            className="text-xs text-muted-foreground"
+                            data-testid={`text-paid-info-${commission.id}`}
+                          >
+                            Paid on{" "}
+                            {format(parseISO(commission.paidAt), "MMM d, yyyy")}
+                            {commission.paidByName ? ` by ${commission.paidByName}` : ""}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right font-bold text-green-600">
                       ${commission.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

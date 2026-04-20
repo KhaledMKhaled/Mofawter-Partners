@@ -138,6 +138,47 @@ export const ListCommissionsResponseItem = zod.object({
 });
 export const ListCommissionsResponse = zod.array(ListCommissionsResponseItem);
 
+export const UpdateCommissionStatusParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateCommissionStatusBody = zod.object({
+  status: zod.enum(["UNPAID", "PAID"]),
+});
+
+export const UpdateCommissionStatusResponse = zod.object({
+  id: zod.number(),
+  orderId: zod.number(),
+  orderName: zod.string().nullish(),
+  clientName: zod.string().nullish(),
+  userId: zod.number(),
+  userName: zod.string().nullish(),
+  amount: zod.number(),
+  roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
+  status: zod.enum(["UNPAID", "PAID"]),
+  createdAt: zod.coerce.date(),
+});
+
+export const MarkCommissionsPaidBody = zod.object({
+  ids: zod.array(zod.number()),
+});
+
+export const MarkCommissionsPaidResponseItem = zod.object({
+  id: zod.number(),
+  orderId: zod.number(),
+  orderName: zod.string().nullish(),
+  clientName: zod.string().nullish(),
+  userId: zod.number(),
+  userName: zod.string().nullish(),
+  amount: zod.number(),
+  roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
+  status: zod.enum(["UNPAID", "PAID"]),
+  createdAt: zod.coerce.date(),
+});
+export const MarkCommissionsPaidResponse = zod.array(
+  MarkCommissionsPaidResponseItem,
+);
+
 export const GetDashboardSummaryResponse = zod.object({
   role: zod.enum(["ADMIN", "DISTRIBUTOR", "SALES"]),
   totalOrders: zod.number(),

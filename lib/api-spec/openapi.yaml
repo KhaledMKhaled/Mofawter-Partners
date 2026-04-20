@@ -189,6 +189,60 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/Commission" }
 
+  /commissions/{id}/status:
+    patch:
+      operationId: updateCommissionStatus
+      tags: [commissions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateCommissionStatusRequest" }
+      responses:
+        "200":
+          description: Commission updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Commission" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Commission not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /commissions/mark-paid:
+    post:
+      operationId: markCommissionsPaid
+      tags: [commissions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MarkCommissionsPaidRequest" }
+      responses:
+        "200":
+          description: Updated commissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Commission" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /dashboard/summary:
     get:
       operationId: getDashboardSummary
@@ -331,6 +385,24 @@ components:
       required: [status]
       properties:
         status: { $ref: "#/components/schemas/OrderStatus" }
+
+    CommissionStatus:
+      type: string
+      enum: [UNPAID, PAID]
+
+    UpdateCommissionStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/CommissionStatus" }
+
+    MarkCommissionsPaidRequest:
+      type: object
+      required: [ids]
+      properties:
+        ids:
+          type: array
+          items: { type: integer }
 
     Commission:
       type: object

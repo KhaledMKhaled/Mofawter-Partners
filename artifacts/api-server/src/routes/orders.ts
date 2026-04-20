@@ -13,6 +13,8 @@ import { getCommissionRates } from "../lib/commission";
 const router: IRouter = Router();
 router.use(requireAuth);
 
+class RevertBlockedError extends Error {}
+
 type EnrichedOrder = {
   id: number;
   clientId: number;
@@ -226,12 +228,30 @@ router.patch("/:id/status", async (req, res) => {
         ]);
       }
     } else if (status === "PENDING" && wasCompleted) {
-      // Reverting — remove commissions for this order
+      // Reverting — refuse if any commission has already been paid out
+      const existing = await tx
+        .select()
+        .from(commissionsTable)
+        .where(eq(commissionsTable.orderId, orderId));
+      const paid = existing.filter((c) => c.status === "PAID");
+      if (paid.length > 0) {
+        throw new RevertBlockedError(
+          "Cannot revert order: one or more commissions have already been marked as PAID.",
+        );
+      }
       await tx
         .delete(commissionsTable)
         .where(eq(commissionsTable.orderId, orderId));
     }
+  }).catch((err) => {
+    if (err instanceof RevertBlockedError) {
+      res.status(409).json({ error: err.message });
+      return undefined;
+    }
+    throw err;
   });
+
+  if (res.headersSent) return;
 
   const [refreshed] = await db
     .select()

@@ -29,7 +29,9 @@ import type {
   HealthStatus,
   ListUsersParams,
   LoginRequest,
+  MarkCommissionsPaidRequest,
   Order,
+  UpdateCommissionStatusRequest,
   UpdateOrderStatusRequest,
   User,
 } from "./api.schemas";
@@ -861,6 +863,169 @@ export function useListCommissions<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+export const getUpdateCommissionStatusUrl = (id: number) => {
+  return `/api/commissions/${id}/status`;
+};
+
+export const updateCommissionStatus = async (
+  id: number,
+  updateCommissionStatusRequest: UpdateCommissionStatusRequest,
+  options?: RequestInit,
+): Promise<Commission> => {
+  return customFetch<Commission>(getUpdateCommissionStatusUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCommissionStatusRequest),
+  });
+};
+
+export const getUpdateCommissionStatusMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCommissionStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateCommissionStatus"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateCommissionStatus(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCommissionStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCommissionStatus>>
+>;
+export type UpdateCommissionStatusMutationBody =
+  BodyType<UpdateCommissionStatusRequest>;
+export type UpdateCommissionStatusMutationError = ErrorType<ErrorResponse>;
+
+export const useUpdateCommissionStatus = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCommissionStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateCommissionStatusMutationOptions(options));
+};
+
+export const getMarkCommissionsPaidUrl = () => {
+  return `/api/commissions/mark-paid`;
+};
+
+export const markCommissionsPaid = async (
+  markCommissionsPaidRequest: MarkCommissionsPaidRequest,
+  options?: RequestInit,
+): Promise<Commission[]> => {
+  return customFetch<Commission[]>(getMarkCommissionsPaidUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(markCommissionsPaidRequest),
+  });
+};
+
+export const getMarkCommissionsPaidMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    TError,
+    { data: BodyType<MarkCommissionsPaidRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof markCommissionsPaid>>,
+  TError,
+  { data: BodyType<MarkCommissionsPaidRequest> },
+  TContext
+> => {
+  const mutationKey = ["markCommissionsPaid"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    { data: BodyType<MarkCommissionsPaidRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return markCommissionsPaid(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MarkCommissionsPaidMutationResult = NonNullable<
+  Awaited<ReturnType<typeof markCommissionsPaid>>
+>;
+export type MarkCommissionsPaidMutationBody =
+  BodyType<MarkCommissionsPaidRequest>;
+export type MarkCommissionsPaidMutationError = ErrorType<ErrorResponse>;
+
+export const useMarkCommissionsPaid = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    TError,
+    { data: BodyType<MarkCommissionsPaidRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof markCommissionsPaid>>,
+  TError,
+  { data: BodyType<MarkCommissionsPaidRequest> },
+  TContext
+> => {
+  return useMutation(getMarkCommissionsPaidMutationOptions(options));
+};
 
 export const getGetDashboardSummaryUrl = () => {
   return `/api/dashboard/summary`;

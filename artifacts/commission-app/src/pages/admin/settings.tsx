@@ -186,7 +186,7 @@ export default function AdminSettings() {
                     <FormField control={form.control} name="salesPct" render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.adminSettings.salesPctLabel}</FormLabel>
-                        <div className="relative"><FormControl><Input type="number" step="0.01" className={t.common.dir === "rtl" ? "pl-8" : "pr-8"} {...field} /></FormControl><div className={`absolute top-1/2 -translate-y-1/2 ${t.common.dir === "rtl" ? "left-3" : "right-3"}`}>%</div></div>
+                        <div className="relative"><FormControl><Input type="number" step="0.01" className={locale === "ar" ? "pl-8" : "pr-8"} {...field} /></FormControl><div className={`absolute top-1/2 -translate-y-1/2 ${locale === "ar" ? "left-3" : "right-3"}`}>%</div></div>
                         <FormDescription>{t.adminSettings.salesPctDesc}</FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -195,7 +195,7 @@ export default function AdminSettings() {
                     <FormField control={form.control} name="distributorPct" render={({ field }) => (
                       <FormItem>
                         <FormLabel>{t.adminSettings.distPctLabel}</FormLabel>
-                        <div className="relative"><FormControl><Input type="number" step="0.01" className={t.common.dir === "rtl" ? "pl-8" : "pr-8"} {...field} /></FormControl><div className={`absolute top-1/2 -translate-y-1/2 ${t.common.dir === "rtl" ? "left-3" : "right-3"}`}>%</div></div>
+                        <div className="relative"><FormControl><Input type="number" step="0.01" className={locale === "ar" ? "pl-8" : "pr-8"} {...field} /></FormControl><div className={`absolute top-1/2 -translate-y-1/2 ${locale === "ar" ? "left-3" : "right-3"}`}>%</div></div>
                         <FormDescription>{t.adminSettings.distPctDesc}</FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -226,10 +226,10 @@ export default function AdminSettings() {
                       )} />
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={pkgForm.control} name="price" render={({ field }) => (
-                          <FormItem><FormLabel>{t.adminSettings.pkgPriceLabel}</FormLabel><FormControl><Input type="number" {...field} className={t.common.dir === "rtl" ? "text-right" : ""} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t.adminSettings.pkgPriceLabel}</FormLabel><FormControl><Input type="number" {...field} className={locale === "ar" ? "text-right" : ""} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={pkgForm.control} name="vatPct" render={({ field }) => (
-                          <FormItem><FormLabel>{t.adminSettings.pkgVatLabel}</FormLabel><FormControl><Input type="number" {...field} className={t.common.dir === "rtl" ? "text-right" : ""} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t.adminSettings.pkgVatLabel}</FormLabel><FormControl><Input type="number" {...field} className={locale === "ar" ? "text-right" : ""} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       <FormField control={pkgForm.control} name="isActive" render={({ field }) => (
@@ -259,7 +259,7 @@ export default function AdminSettings() {
                         <TableCell className="font-medium">{pkg.name}</TableCell>
                         <TableCell className="dir-ltr" dir="ltr">{formatCurrency(pkg.price, locale)}</TableCell>
                         <TableCell className="dir-ltr" dir="ltr">{pkg.vatPct}%</TableCell>
-                        <TableCell><Switch checked={pkg.isActive} onCheckedChange={() => togglePkgActive(pkg.id, pkg.isActive)} className={t.common.dir === "rtl" ? "rotate-180" : ""} /></TableCell>
+                        <TableCell><Switch checked={pkg.isActive} onCheckedChange={() => togglePkgActive(pkg.id, pkg.isActive)} className={locale === "ar" ? "rotate-180" : ""} /></TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" onClick={() => removePkg(pkg.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                         </TableCell>

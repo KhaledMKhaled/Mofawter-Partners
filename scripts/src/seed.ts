@@ -150,7 +150,7 @@ async function seed() {
         vatAmount: extractVatString(packages[1]),
         receiptNumber: "R-1001",
         isFullyCollected: true,
-        status: "COMPLETED",
+        status: "COLLECTED",
       },
       {
         clientId: clients[0].id,
@@ -159,7 +159,7 @@ async function seed() {
         amount: packages[0].price,
         vatAmount: extractVatString(packages[0]),
         receiptNumber: "R-1002",
-        status: "PENDING",
+        status: "NEW",
       },
       {
         clientId: clients[1].id,
@@ -169,7 +169,7 @@ async function seed() {
         vatAmount: extractVatString(packages[2]),
         receiptNumber: "R-1003",
         isFullyCollected: true,
-        status: "COMPLETED",
+        status: "COLLECTED",
       },
       {
         clientId: clients[2].id,
@@ -178,13 +178,13 @@ async function seed() {
         amount: packages[0].price,
         vatAmount: extractVatString(packages[0]),
         receiptNumber: "R-1004",
-        status: "PENDING",
+        status: "NEW",
       },
     ])
     .returning();
 
-  console.log("Generating commissions for COMPLETED orders...");
-  const completed = orders.filter((o) => o.status === "COMPLETED");
+  console.log("Generating commissions for COLLECTED orders...");
+  const completed = orders.filter((o) => o.status === "COLLECTED");
   const commissionRows = [] as (typeof commissionsTable.$inferInsert)[];
   for (const o of completed) {
     const amount = Number(o.amount);
@@ -193,6 +193,7 @@ async function seed() {
         orderId: o.id,
         clientId: o.clientId,
         userId: sales.id,
+        baseAmount: o.amount,
         amount: (amount * 0.1).toFixed(2),
         roleType: "SALES",
       },
@@ -200,6 +201,7 @@ async function seed() {
         orderId: o.id,
         clientId: o.clientId,
         userId: distributor.id,
+        baseAmount: o.amount,
         amount: (amount * 0.05).toFixed(2),
         roleType: "DISTRIBUTOR",
       },

@@ -114,7 +114,7 @@ export default function DistributorOrders() {
                       })}
                     </TableCell>
                     <TableCell>
-                      {order.status === "COMPLETED" ? (
+                      {(order.status as string) === "COLLECTED" ? (
                         <Badge
                           variant="outline"
                           className="bg-green-50 text-green-700 border-green-200"

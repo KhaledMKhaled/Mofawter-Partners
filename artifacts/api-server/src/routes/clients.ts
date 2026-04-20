@@ -85,7 +85,7 @@ router.get("/lookup", async (req, res, next) => {
     const [pendingOrder] = await db
       .select()
       .from(ordersTable)
-      .where(and(eq(ordersTable.clientId, client.id), eq(ordersTable.status, "PENDING")))
+      .where(and(eq(ordersTable.clientId, client.id), eq(ordersTable.status, "NEW")))
       .limit(1);
 
     res.json({
@@ -271,7 +271,7 @@ router.get("/:id", async (req, res, next) => {
       orderId: number | null;
       orderName: string | null;
       commissionId: number | null;
-      commissionStatus: "UNPAID" | "PAID" | null;
+      commissionStatus: string | null;
       amount: number | null;
       details: string;
     }> = [];
@@ -288,7 +288,7 @@ router.get("/:id", async (req, res, next) => {
         details: `Order created (${o.status})`,
       });
 
-      if (o.status !== "PENDING") {
+      if (o.status !== "NEW") {
         timeline.push({
           type: "ORDER_STATUS_CHANGED",
           occurredAt: o.orderDate.toISOString(),

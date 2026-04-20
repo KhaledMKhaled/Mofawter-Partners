@@ -175,7 +175,7 @@ export default function AdminPaymentBatches() {
       <Card>
         <CardHeader>
           <CardTitle>{t.paymentBatches.allBatches}</CardTitle>
-          <CardDescription>{t.paymentBatches.allBatchesDesc}</CardDescription>
+          <CardDescription>{(t.paymentBatches as any).allBatchesDesc}</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {batches.length === 0 ? (
@@ -213,7 +213,7 @@ export default function AdminPaymentBatches() {
                         {t.roles[batch.beneficiaryType as keyof typeof t.roles] ?? batch.beneficiaryType}
                       </div>
                     </TableCell>
-                    <TableCell>{batch.commissionCount} {t.paymentBatches.commissionsSuffix} · {batch.clientCount} {t.paymentBatches.clientsSuffix}</TableCell>
+                    <TableCell>{batch.commissionCount} {(t.paymentBatches as any).commissionsSuffix} · {batch.clientCount} {(t.paymentBatches as any).clientsSuffix}</TableCell>
                     <TableCell className="text-right font-bold whitespace-nowrap">
                       {formatCurrency(batch.totalAmount, locale)}
                     </TableCell>
@@ -228,7 +228,7 @@ export default function AdminPaymentBatches() {
                         </Button>
                         {batch.status === "DRAFT" && (
                           <Button size="sm" onClick={() => setConfirmBatchId(batch.id)} className="gap-1">
-                            <CheckCircle2 className="h-3.5 w-3.5" /> {t.paymentBatches.confirm}
+                            <CheckCircle2 className="h-3.5 w-3.5" /> {(t.paymentBatches as any).confirm}
                           </Button>
                         )}
                       </div>
@@ -254,7 +254,7 @@ export default function AdminPaymentBatches() {
           {isLoadingComm ? (
             <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>
           ) : eligibleCommissions.length === 0 ? (
-            <Empty icon={CreditCard} title={t.paymentBatches.noEligibleCommissions} description={t.paymentBatches.noEligibleDesc} className="py-8" />
+            <Empty icon={CreditCard} title={(t.paymentBatches as any).noEligibleCommissions} description={t.paymentBatches.noEligibleDesc} className="py-8" />
           ) : (
             <div className="space-y-4">
               <Table>
@@ -263,8 +263,8 @@ export default function AdminPaymentBatches() {
                     <TableHead className="w-8"></TableHead>
                     <TableHead>{t.paymentBatches.commissions}</TableHead>
                     <TableHead>{t.paymentBatches.beneficiary}</TableHead>
-                    <TableHead>{t.paymentBatches.type}</TableHead>
-                    <TableHead className="text-right">{t.paymentBatches.amount}</TableHead>
+                    <TableHead>{(t.paymentBatches as any).type}</TableHead>
+                    <TableHead className="text-right">{(t.paymentBatches as any).amount}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -294,7 +294,7 @@ export default function AdminPaymentBatches() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-xs">{c.commissionType?.replace("_", " ")}</Badge>
+                        <Badge variant="outline" className="text-xs">{(c as any).commissionType?.replace("_", " ")}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-bold text-emerald-600 whitespace-nowrap">
                         {formatCurrency(c.amount, locale)}
@@ -307,13 +307,13 @@ export default function AdminPaymentBatches() {
               {selectedCommIds.size > 0 && (
                 <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20">
                   <div>
-                    <p className="font-semibold">{t.paymentBatches.commissionsSelected.replace("{count}", String(selectedCommIds.size))}</p>
+                    <p className="font-semibold">{(t.paymentBatches as any).commissionsSelected.replace("{count}", String(selectedCommIds.size))}</p>
                     <p className="text-sm text-muted-foreground mt-1">
                       {t.paymentBatches.total}: <span className="font-bold text-primary">{formatCurrency(selectedTotal, locale)}</span>
                     </p>
                   </div>
                   <Button onClick={handleCreateBatch}>
-                    <Plus className="me-2 h-4 w-4" /> {t.paymentBatches.createBtn}
+                    <Plus className="me-2 h-4 w-4" /> {(t.paymentBatches as any).createBtn}
                   </Button>
                 </div>
               )}
@@ -332,9 +332,9 @@ export default function AdminPaymentBatches() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="px-6 pb-4">
-            <label className="text-sm font-medium mb-2 block">{t.paymentBatches.paymentReference}</label>
+            <label className="text-sm font-medium mb-2 block">{(t.paymentBatches as any).paymentReference}</label>
             <Input
-              placeholder={t.paymentBatches.paymentReferencePlaceholder}
+              placeholder={t.paymentBatches.paymentRefPlaceholder}
               value={paymentRef}
               onChange={(e) => setPaymentRef(e.target.value)}
               className="text-start"
@@ -343,7 +343,7 @@ export default function AdminPaymentBatches() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirm} disabled={isConfirming}>
-              {isConfirming ? t.paymentBatches.confirming : t.paymentBatches.confirmBtn}
+              {isConfirming ? t.paymentBatches.confirming : (t.paymentBatches as any).confirmBtn}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

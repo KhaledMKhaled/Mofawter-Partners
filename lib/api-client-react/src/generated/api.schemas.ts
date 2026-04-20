@@ -124,8 +124,17 @@ export interface ClientLookupResult {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 
 export const OrderStatus = {
-  PENDING: "PENDING",
-  COMPLETED: "COMPLETED",
+  NEW: "NEW",
+  UNDER_REVIEW: "UNDER_REVIEW",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  IN_EXECUTION: "IN_EXECUTION",
+  EXECUTED: "EXECUTED",
+  COLLECTED: "COLLECTED",
+  COMMISSION_PENDING: "COMMISSION_PENDING",
+  COMMISSION_READY: "COMMISSION_READY",
+  COMMISSION_PAID: "COMMISSION_PAID",
+  CANCELLED: "CANCELLED",
 } as const;
 
 export interface Order {

@@ -38,7 +38,7 @@ function StatusBadge({ status }: { status: string }) {
   const { t } = useI18n();
   return (
     <Badge variant="outline" className={`text-xs whitespace-nowrap ${STATUS_COLORS[status] ?? ""}`}>
-      {t.statuses[status as keyof typeof t.statuses] ?? status.replace(/_/g, " ")}
+      {((t as any).statuses ?? {})[status as string] ?? status.replace(/_/g, " ")}
     </Badge>
   );
 }
@@ -136,7 +136,7 @@ function OrdersReport({ type }: { type: "pending" | "completed" }) {
                     <TableCell>{o.packageName ?? o.orderName}</TableCell>
                     <TableCell>{o.salesName}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">{t.paymentBatches.orderTypes[o.orderType as keyof typeof t.paymentBatches.orderTypes] ?? o.orderType?.replace(/_/g, " ")}</Badge>
+                      <Badge variant="outline" className="text-xs">{((t.paymentBatches as any).orderTypes?.[o.orderType as string]) ?? o.orderType?.replace(/_/g, " ")}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium whitespace-nowrap" dir="ltr">
                       {formatCurrency(o.amount, locale)}
@@ -220,7 +220,7 @@ function CommissionsReport({ type }: { type: "pending" | "paid" }) {
                     </TableCell>
                     <TableCell>{c.clientName}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">{t.commissionRules.eventTypes[c.commissionType as keyof typeof t.commissionRules.eventTypes] ?? c.commissionType?.replace(/_/g, " ")}</Badge>
+                      <Badge variant="outline" className="text-xs">{((t.commissionRules as any).eventTypes?.[c.commissionType as string]) ?? c.commissionType?.replace(/_/g, " ")}</Badge>
                     </TableCell>
                     <TableCell className="text-right text-sm whitespace-nowrap" dir="ltr">
                       {formatCurrency(c.baseAmount, locale)}

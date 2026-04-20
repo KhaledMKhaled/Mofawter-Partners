@@ -74,10 +74,10 @@ router.get("/summary", async (req, res) => {
   }
 
   const totalOrders = orders.length;
-  const completedOrders = orders.filter((o) => o.status === "COMPLETED").length;
+  const completedOrders = orders.filter((o) => o.status === "COLLECTED").length;
   const pendingOrders = totalOrders - completedOrders;
   const totalSales = orders
-    .filter((o) => o.status === "COMPLETED")
+    .filter((o) => o.status === "COLLECTED")
     .reduce((s, o) => s + Number(o.amount), 0);
   const totalCommissions = commissions.reduce(
     (s, c) => s + Number(c.amount),

@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+ codex/add-unified-orders-endpoint
+import { 
+  useLookupClient, 
 import {
   useLookupClient,
   useCreateClient,
+main
   useListPackages,
-  useCreateOrder,
+  useCreateUnifiedOrder,
   getListOrdersQueryKey,
   getGetDashboardSummaryQueryKey,
   getListClientsQueryKey,
@@ -63,7 +67,8 @@ const orderInfoSchema = z.object({
 export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
   const [taxCardSearch, setTaxCardSearch] = useState("");
   const [foundClient, setFoundClient] = useState<any>(null);
-
+codex/add-unified-orders-endpoint
+main
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -74,8 +79,12 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpe
 
   const { data: packages } = useListPackages();
 
+codex/add-unified-orders-endpoint
+  // Mutations
+  const createUnifiedOrder = useCreateUnifiedOrder();
   const createClient = useCreateClient();
   const createOrder = useCreateOrder();
+main
 
   const clientForm = useForm<z.infer<typeof clientInfoSchema>>({
     resolver: zodResolver(clientInfoSchema),
@@ -108,6 +117,7 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpe
   const resetWizard = () => {
     setTaxCardSearch("");
     setFoundClient(null);
+    taxForm.reset();
     clientForm.reset();
     orderForm.reset();
   };
@@ -139,12 +149,40 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpe
       });
       return;
     }
+  }
+
+  const onClientSubmit = (_values: z.infer<typeof clientInfoSchema>) => {
+    setStep(3);
+  };
 
     setFoundClient(null);
     clientForm.setValue("taxCardNumber", taxCardSearch, { shouldValidate: true });
   }, [lookupData, taxCardSearch, clientForm]);
 
   const activePackageId = orderForm.watch("packageId");
+  const selectedPkg = packages?.find(p => p.id === activePackageId);
+  
+  const finishOrder = () => {
+    const values = orderForm.getValues();
+    
+    createUnifiedOrder.mutate({
+      data: {
+        taxCardNumber: foundClient?.taxCardNumber || clientForm.getValues().taxCardNumber,
+        client: foundClient ? undefined : clientForm.getValues(),
+        packageId: values.packageId,
+        receiptNumber: values.receiptNumber,
+        isFullyCollected: values.isFullyCollected
+      }
+    }, {
+      onSuccess: () => {
+        toast({ title: "Order created successfully" });
+        queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getListClientsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+        handleOpenChange(false);
+      },
+      onError: (err: any) => {
+        toast({ title: "Error creating order", description: err?.data?.error || "Unknown error", variant: "destructive" });
   const selectedPkg = packages?.find((p: any) => p.id === activePackageId);
 
   const isPendingOrderBlocked = !!lookupData?.found && !!lookupData?.hasPendingOrder;
@@ -343,6 +381,11 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpe
             </div>
           </Form>
 
+                  <div className="flex justify-between pt-4">
+                    <Button type="button" variant="outline" onClick={() => setStep(1)}>Back</Button>
+                    <Button type="submit">
+                      Save and Continue
+                    </Button>
           <Form {...orderForm}>
             <div className="space-y-4">
               <h3 className="font-semibold text-lg flex items-center">
@@ -400,6 +443,13 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean; onOpe
             </div>
           </Form>
 
+            <div className="flex justify-between pt-4">
+              <Button type="button" variant="outline" onClick={() => setStep(3)}>Back</Button>
+              <Button onClick={finishOrder} disabled={createUnifiedOrder.isPending}>
+                <Check className="mr-2 h-4 w-4" />
+                {createUnifiedOrder.isPending ? "Submitting..." : "Confirm & Submit Order"}
+              </Button>
+            </div>
           <div className="flex justify-end pt-2">
             <Button onClick={onCreateOrder} disabled={isSubmitting || isPendingOrderBlocked || !clientForm.watch("taxCardNumber")}>
               {isSubmitting ? "Creating..." : "Create Order"}

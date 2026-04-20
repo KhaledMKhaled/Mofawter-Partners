@@ -345,6 +345,22 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Order" }
 
+  /orders/unified:
+    post:
+      operationId: createUnifiedOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUnifiedOrderRequest" }
+      responses:
+        "201":
+          description: Unified order created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UnifiedOrderResponse" }
+
   /orders/{id}/status:
     patch:
       operationId: updateOrderStatus
@@ -693,6 +709,23 @@ components:
         packageId: { type: integer }
         receiptNumber: { type: ["string", "null"] }
         isFullyCollected: { type: boolean }
+
+    CreateUnifiedOrderRequest:
+      type: object
+      required: [taxCardNumber, packageId, isFullyCollected]
+      properties:
+        taxCardNumber: { type: string }
+        client: { $ref: "#/components/schemas/CreateClientRequest" }
+        packageId: { type: integer }
+        receiptNumber: { type: ["string", "null"] }
+        isFullyCollected: { type: boolean }
+
+    UnifiedOrderResponse:
+      type: object
+      required: [client, order]
+      properties:
+        client: { $ref: "#/components/schemas/Client" }
+        order: { $ref: "#/components/schemas/Order" }
 
     UpdateOrderStatusRequest:
       type: object

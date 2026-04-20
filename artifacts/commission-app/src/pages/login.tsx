@@ -3,7 +3,8 @@ import { useLocation } from "wouter";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLogin, Role } from "@workspace/api-client-react";
+import { useLogin, Role } from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { Briefcase, ArrowRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -57,7 +58,7 @@ export default function Login() {
           else if (data.user.role === Role.DISTRIBUTOR) setLocation("/distributor");
           else setLocation("/sales");
         },
-        onError: (error: any) => {
+        onError: (error: ApiError<{ error?: string }>) => {
           const msg = error?.data?.error || "Invalid credentials or server error.";
           setErrorMsg(msg);
         },

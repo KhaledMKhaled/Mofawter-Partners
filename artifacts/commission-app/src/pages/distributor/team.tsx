@@ -8,7 +8,8 @@ import {
   getListUsersQueryKey,
   Role,
   getGetDashboardSummaryQueryKey
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Users2, Plus, UserSquare2 } from "lucide-react";
@@ -92,7 +93,7 @@ export default function DistributorTeam() {
           setIsDialogOpen(false);
           form.reset();
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error creating agent",
             description: err?.data?.error || "Unknown error",

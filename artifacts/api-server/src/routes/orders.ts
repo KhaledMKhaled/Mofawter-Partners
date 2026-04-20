@@ -6,7 +6,7 @@ import {
   usersTable,
   commissionsTable,
 } from "@workspace/db";
-import { and, eq, desc } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { getCommissionRates } from "../lib/commission";
 
@@ -235,8 +235,6 @@ router.patch("/:id/status", async (req, res) => {
     .where(eq(ordersTable.id, orderId));
   const [enriched] = await enrichOrders([refreshed]);
   res.json(enriched);
-  // suppress unused import warnings
-  void and;
 });
 
 export default router;

@@ -5,10 +5,11 @@ import {
   getListOrdersQueryKey,
   getGetDashboardSummaryQueryKey,
   getListCommissionsQueryKey
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays, parseISO } from "date-fns";
-import { CheckCircle2, Clock, Info } from "lucide-react";
+import { CheckCircle2, Clock, Info, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 import {
@@ -66,7 +67,7 @@ export default function AdminOrders() {
           queryClient.invalidateQueries({ queryKey: getListCommissionsQueryKey() });
           setConfirmCompleteId(null);
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error",
             description: err?.data?.error || "Failed to update order status",

@@ -27,7 +27,7 @@ import SalesCommissions from "@/pages/sales/commissions";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ component: Component, role }: { component: any, role: string }) {
+function ProtectedRoute({ component: Component, role }: { component: React.ComponentType, role: string }) {
   const [location, setLocation] = useLocation();
   const token = localStorage.getItem("auth_token");
 

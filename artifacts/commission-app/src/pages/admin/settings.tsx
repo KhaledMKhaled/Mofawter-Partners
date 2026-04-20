@@ -6,7 +6,8 @@ import {
   useGetCommissionRates, 
   useUpdateCommissionRates,
   getGetCommissionRatesQueryKey 
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Save, Percent } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -73,7 +74,7 @@ export default function AdminSettings() {
           toast({ title: "Commission rates updated successfully" });
           queryClient.setQueryData(getGetCommissionRatesQueryKey(), data);
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error updating rates",
             description: err?.data?.error || "Unknown error",

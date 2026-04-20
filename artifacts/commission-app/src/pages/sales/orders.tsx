@@ -8,7 +8,8 @@ import {
   useCreateOrder,
   getListOrdersQueryKey,
   getGetDashboardSummaryQueryKey
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { ShoppingCart, Plus, AlertCircle } from "lucide-react";
@@ -99,7 +100,7 @@ export default function SalesOrders() {
           queryClient.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
           form.reset({ clientId: 0, orderName: "", amount: 0 });
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error submitting order",
             description: err?.data?.error || "Unknown error",

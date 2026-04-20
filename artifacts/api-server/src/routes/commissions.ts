@@ -84,6 +84,18 @@ router.get("/", async (req, res) => {
       .select()
       .from(commissionsTable)
       .orderBy(desc(commissionsTable.createdAt));
+  } else if (role === "DISTRIBUTOR") {
+    // Distributor sees their own commissions PLUS those of every Sales agent on their team.
+    const team = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.distributorId, sub));
+    const allowedUserIds = new Set<number>([sub, ...team.map((u) => u.id)]);
+    const all = await db
+      .select()
+      .from(commissionsTable)
+      .orderBy(desc(commissionsTable.createdAt));
+    rows = all.filter((c) => allowedUserIds.has(c.userId));
   } else {
     rows = await db
       .select()

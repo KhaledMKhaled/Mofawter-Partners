@@ -7,7 +7,8 @@ import {
   useCreateClient,
   getListClientsQueryKey,
   getGetDashboardSummaryQueryKey
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { UserSquare2, Plus } from "lucide-react";
@@ -84,7 +85,7 @@ export default function SalesClients() {
           setIsDialogOpen(false);
           form.reset();
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error adding client",
             description: err?.data?.error || "Unknown error",

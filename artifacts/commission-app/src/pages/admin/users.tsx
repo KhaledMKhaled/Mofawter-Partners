@@ -8,7 +8,8 @@ import {
   getListUsersQueryKey,
   Role,
   User
-} from "@workspace/api-client-react";
+} from "@workspace/api-client-react"
+import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Users, Plus, Shield, Briefcase, UserSquare2 } from "lucide-react";
@@ -62,7 +63,7 @@ export default function AdminUsers() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useListUsers({
+  const { data: users, isLoading } = useListUsers(undefined, {
     query: { queryKey: getListUsersQueryKey() }
   });
 
@@ -92,7 +93,7 @@ export default function AdminUsers() {
           setIsDialogOpen(false);
           form.reset();
         },
-        onError: (err: any) => {
+        onError: (err: ApiError<{ error?: string }>) => {
           toast({
             title: "Error creating distributor",
             description: err?.data?.error || "Unknown error",

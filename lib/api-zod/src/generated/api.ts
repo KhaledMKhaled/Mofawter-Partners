@@ -347,6 +347,31 @@ export const CreateOrderBody = zod.object({
   isFullyCollected: zod.boolean(),
 });
 
+export const CreateUnifiedOrderBody = zod.object({
+  taxCardNumber: zod.string(),
+  client: zod
+    .object({
+      name: zod.string(),
+      taxCardNumber: zod.string(),
+      taxCardName: zod.string(),
+      issuingAuthority: zod.string(),
+      commercialRegistryNumber: zod.string(),
+      businessType: zod.string(),
+      email: zod.string(),
+      phone1: zod.string(),
+      phone1WhatsApp: zod.boolean(),
+      phone2: zod.string().nullish(),
+      phone2WhatsApp: zod.boolean().optional(),
+      nationalId: zod.string(),
+      address: zod.string(),
+      assignedSalesId: zod.number().nullish(),
+    })
+    .optional(),
+  packageId: zod.number(),
+  receiptNumber: zod.string().nullish(),
+  isFullyCollected: zod.boolean(),
+});
+
 export const UpdateOrderStatusParams = zod.object({
   id: zod.coerce.number(),
 });

@@ -4,9 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { 
   useLookupClient, 
-  useCreateClient,
   useListPackages,
-  useCreateOrder,
+  useCreateUnifiedOrder,
   getListOrdersQueryKey,
   getGetDashboardSummaryQueryKey,
   getListClientsQueryKey,
@@ -70,7 +69,6 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
   const [step, setStep] = useState<Step>(1);
   const [taxCardSearch, setTaxCardSearch] = useState("");
   const [foundClient, setFoundClient] = useState<any>(null);
-  const [newClientId, setNewClientId] = useState<number | null>(null);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -84,8 +82,7 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
   const { data: packages } = useListPackages();
 
   // Mutations
-  const createClient = useCreateClient();
-  const createOrder = useCreateOrder();
+  const createUnifiedOrder = useCreateUnifiedOrder();
 
   // Forms
   const taxForm = useForm<z.infer<typeof taxLookupSchema>>({
@@ -115,7 +112,6 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
     setStep(1);
     setTaxCardSearch("");
     setFoundClient(null);
-    setNewClientId(null);
     taxForm.reset();
     clientForm.reset();
     orderForm.reset();
@@ -147,33 +143,24 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
     }
   }
 
-  const onClientSubmit = (values: z.infer<typeof clientInfoSchema>) => {
-    createClient.mutate({ data: values }, {
-      onSuccess: (res) => {
-        setNewClientId(res.id);
-        setStep(3);
-      },
-      onError: (err: any) => {
-        toast({ title: "Error creating client", description: err?.data?.error || "Unknown error", variant: "destructive" });
-      }
-    });
+  const onClientSubmit = (_values: z.infer<typeof clientInfoSchema>) => {
+    setStep(3);
   };
 
   const onOrderSubmit = (values: z.infer<typeof orderInfoSchema>) => {
     setStep(4);
   };
 
-  const activeClientId = foundClient?.id || newClientId;
   const activePackageId = orderForm.watch("packageId");
   const selectedPkg = packages?.find(p => p.id === activePackageId);
   
   const finishOrder = () => {
     const values = orderForm.getValues();
-    if (!activeClientId) return;
     
-    createOrder.mutate({
+    createUnifiedOrder.mutate({
       data: {
-        clientId: activeClientId,
+        taxCardNumber: foundClient?.taxCardNumber || clientForm.getValues().taxCardNumber,
+        client: foundClient ? undefined : clientForm.getValues(),
         packageId: values.packageId,
         receiptNumber: values.receiptNumber,
         isFullyCollected: values.isFullyCollected
@@ -321,8 +308,8 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
 
                   <div className="flex justify-between pt-4">
                     <Button type="button" variant="outline" onClick={() => setStep(1)}>Back</Button>
-                    <Button type="submit" disabled={createClient.isPending}>
-                      {createClient.isPending ? "Saving..." : "Save and Continue"}
+                    <Button type="submit">
+                      Save and Continue
                     </Button>
                   </div>
                 </form>
@@ -424,9 +411,9 @@ export function OrderWizardDialog({ open, onOpenChange }: { open: boolean, onOpe
 
             <div className="flex justify-between pt-4">
               <Button type="button" variant="outline" onClick={() => setStep(3)}>Back</Button>
-              <Button onClick={finishOrder} disabled={createOrder.isPending}>
+              <Button onClick={finishOrder} disabled={createUnifiedOrder.isPending}>
                 <Check className="mr-2 h-4 w-4" />
-                {createOrder.isPending ? "Submitting..." : "Confirm & Submit Order"}
+                {createUnifiedOrder.isPending ? "Submitting..." : "Confirm & Submit Order"}
               </Button>
             </div>
           </div>

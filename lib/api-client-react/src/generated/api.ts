@@ -27,6 +27,7 @@ import type {
   CreateClientRequest,
   CreateOrderRequest,
   CreatePackageRequest,
+  CreateUnifiedOrderRequest,
   CreateUserRequest,
   DashboardSummary,
   ErrorResponse,
@@ -38,6 +39,7 @@ import type {
   Order,
   Package,
   ReassignClientRequest,
+  UnifiedOrderResponse,
   UpdateClientRequest,
   UpdateCommissionStatusRequest,
   UpdateOrderStatusRequest,
@@ -1439,6 +1441,87 @@ export const useCreateOrder = <
   TContext
 > => {
   return useMutation(getCreateOrderMutationOptions(options));
+};
+
+export const getCreateUnifiedOrderUrl = () => {
+  return `/api/orders/unified`;
+};
+
+export const createUnifiedOrder = async (
+  createUnifiedOrderRequest: CreateUnifiedOrderRequest,
+  options?: RequestInit,
+): Promise<UnifiedOrderResponse> => {
+  return customFetch<UnifiedOrderResponse>(getCreateUnifiedOrderUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createUnifiedOrderRequest),
+  });
+};
+
+export const getCreateUnifiedOrderMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createUnifiedOrder>>,
+    TError,
+    { data: BodyType<CreateUnifiedOrderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createUnifiedOrder>>,
+  TError,
+  { data: BodyType<CreateUnifiedOrderRequest> },
+  TContext
+> => {
+  const mutationKey = ["createUnifiedOrder"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createUnifiedOrder>>,
+    { data: BodyType<CreateUnifiedOrderRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createUnifiedOrder(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateUnifiedOrderMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createUnifiedOrder>>
+>;
+export type CreateUnifiedOrderMutationBody =
+  BodyType<CreateUnifiedOrderRequest>;
+export type CreateUnifiedOrderMutationError = ErrorType<unknown>;
+
+export const useCreateUnifiedOrder = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createUnifiedOrder>>,
+    TError,
+    { data: BodyType<CreateUnifiedOrderRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createUnifiedOrder>>,
+  TError,
+  { data: BodyType<CreateUnifiedOrderRequest> },
+  TContext
+> => {
+  return useMutation(getCreateUnifiedOrderMutationOptions(options));
 };
 
 export const getUpdateOrderStatusUrl = (id: number) => {

@@ -37,6 +37,58 @@ type EnrichedOrder = {
   createdAt: string;
 };
 
+type ClientDto = {
+  id: number;
+  name: string;
+  taxCardNumber: string;
+  taxCardName: string;
+  issuingAuthority: string;
+  commercialRegistryNumber: string;
+  businessType: string;
+  email: string;
+  phone1: string;
+  phone1WhatsApp: boolean;
+  phone2: string | null;
+  phone2WhatsApp: boolean;
+  nationalId: string;
+  address: string;
+  assignedSalesId: number;
+  assignedDistributorId: number;
+  ownershipStartDate: string;
+  ownershipEndDate: string;
+  createdAt: string;
+};
+
+function toClientDto(c: typeof clientsTable.$inferSelect): ClientDto {
+  return {
+    id: c.id,
+    name: c.name,
+    taxCardNumber: c.taxCardNumber,
+    taxCardName: c.taxCardName,
+    issuingAuthority: c.issuingAuthority,
+    commercialRegistryNumber: c.commercialRegistryNumber,
+    businessType: c.businessType,
+    email: c.email,
+    phone1: c.phone1,
+    phone1WhatsApp: c.phone1WhatsApp,
+    phone2: c.phone2,
+    phone2WhatsApp: c.phone2WhatsApp,
+    nationalId: c.nationalId,
+    address: c.address,
+    assignedSalesId: c.assignedSalesId,
+    assignedDistributorId: c.assignedDistributorId,
+    ownershipStartDate: c.ownershipStartDate.toISOString(),
+    ownershipEndDate: c.ownershipEndDate.toISOString(),
+    createdAt: c.createdAt.toISOString(),
+  };
+}
+
+function addFiveYears(start: Date): Date {
+  const end = new Date(start);
+  end.setFullYear(end.getFullYear() + 5);
+  return end;
+}
+
 async function enrichOrders(
   rows: (typeof ordersTable.$inferSelect)[],
 ): Promise<EnrichedOrder[]> {
@@ -217,6 +269,196 @@ router.post("/", async (req, res, next) => {
     const [enriched] = await enrichOrders([created]);
     res.status(201).json(enriched);
   } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/unified", async (req, res, next) => {
+  try {
+    const { role, sub } = req.auth!;
+    const {
+      taxCardNumber,
+      client,
+      packageId,
+      receiptNumber,
+      isFullyCollected,
+    } = req.body ?? {};
+
+    if (!taxCardNumber || !packageId || isFullyCollected === undefined) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+
+    const result = await db.transaction(async (tx) => {
+      let [existingClient] = await tx
+        .select()
+        .from(clientsTable)
+        .where(eq(clientsTable.taxCardNumber, String(taxCardNumber)));
+
+      if (!existingClient) {
+        if (!client) {
+          res.status(400).json({ error: "Client data is required for new tax cards" });
+          return null;
+        }
+
+        const {
+          name,
+          assignedSalesId,
+          taxCardName,
+          issuingAuthority,
+          commercialRegistryNumber,
+          businessType,
+          email,
+          phone1,
+          phone1WhatsApp,
+          phone2,
+          phone2WhatsApp,
+          nationalId,
+          address,
+        } = client;
+
+        if (
+          !name ||
+          !taxCardName ||
+          !issuingAuthority ||
+          !commercialRegistryNumber ||
+          !businessType ||
+          !email ||
+          !phone1 ||
+          !nationalId ||
+          !address
+        ) {
+          res.status(400).json({ error: "Incomplete client data for new client creation" });
+          return null;
+        }
+
+        let salesId: number;
+        if (role === "SALES") {
+          salesId = sub;
+        } else if (role === "DISTRIBUTOR" || role === "ADMIN") {
+          if (!assignedSalesId) {
+            res.status(400).json({ error: "assignedSalesId is required" });
+            return null;
+          }
+          salesId = Number(assignedSalesId);
+        } else {
+          res.status(403).json({ error: "Forbidden" });
+          return null;
+        }
+
+        const [sales] = await tx
+          .select()
+          .from(usersTable)
+          .where(and(eq(usersTable.id, salesId), eq(usersTable.role, "SALES")));
+        if (!sales || !sales.distributorId) {
+          res.status(400).json({ error: "Sales agent not found" });
+          return null;
+        }
+        if (role === "DISTRIBUTOR" && sales.distributorId !== sub) {
+          res.status(403).json({ error: "Sales agent does not belong to your team" });
+          return null;
+        }
+
+        const start = new Date();
+        const end = addFiveYears(start);
+        const [createdClient] = await tx
+          .insert(clientsTable)
+          .values({
+            name,
+            taxCardNumber: String(taxCardNumber),
+            taxCardName,
+            issuingAuthority,
+            commercialRegistryNumber,
+            businessType,
+            email,
+            phone1,
+            phone1WhatsApp: phone1WhatsApp || false,
+            phone2: phone2 || null,
+            phone2WhatsApp: phone2WhatsApp || false,
+            nationalId,
+            address,
+            assignedSalesId: salesId,
+            assignedDistributorId: sales.distributorId,
+            ownershipStartDate: start,
+            ownershipEndDate: end,
+          })
+          .returning();
+        existingClient = createdClient;
+      }
+
+      if (role === "SALES" && existingClient.assignedSalesId !== sub) {
+        res.status(403).json({ error: "You do not own this client" });
+        return null;
+      }
+
+      if (role === "DISTRIBUTOR" && existingClient.assignedDistributorId !== sub) {
+        res.status(403).json({ error: "Client not in your team" });
+        return null;
+      }
+
+      const [pendingOrder] = await tx
+        .select()
+        .from(ordersTable)
+        .where(
+          and(
+            eq(ordersTable.clientId, existingClient.id),
+            eq(ordersTable.status, "PENDING"),
+          ),
+        )
+        .limit(1);
+      if (pendingOrder) {
+        res.status(400).json({ error: "Client already has a pending order." });
+        return null;
+      }
+
+      const [pkg] = await tx
+        .select()
+        .from(packagesTable)
+        .where(eq(packagesTable.id, Number(packageId)));
+      if (!pkg) {
+        res.status(404).json({ error: "Package not found" });
+        return null;
+      }
+      if (!pkg.isActive) {
+        res.status(400).json({ error: "Package is not active" });
+        return null;
+      }
+
+      const price = Number(pkg.price);
+      const vatPct = Number(pkg.vatPct);
+      const vatAmount = (price * (vatPct / 100)).toFixed(2);
+
+      const [createdOrder] = await tx
+        .insert(ordersTable)
+        .values({
+          clientId: existingClient.id,
+          packageId: pkg.id,
+          orderName: pkg.name,
+          amount: pkg.price.toString(),
+          vatAmount: vatAmount.toString(),
+          receiptNumber: receiptNumber || null,
+          isFullyCollected,
+          status: "PENDING",
+        })
+        .returning();
+
+      return { client: existingClient, order: createdOrder };
+    });
+
+    if (!result) {
+      return;
+    }
+
+    const [enrichedOrder] = await enrichOrders([result.order]);
+    res.status(201).json({
+      client: toClientDto(result.client),
+      order: enrichedOrder,
+    });
+  } catch (err: any) {
+    if (err?.code === "23505") {
+      res.status(400).json({ error: "Tax card number already exists" });
+      return;
+    }
     next(err);
   }
 });

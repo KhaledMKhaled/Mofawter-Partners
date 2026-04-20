@@ -212,6 +212,20 @@ export interface CreateOrderRequest {
   isFullyCollected: boolean;
 }
 
+export interface CreateUnifiedOrderRequest {
+  taxCardNumber: string;
+  client?: CreateClientRequest;
+  packageId: number;
+  /** @nullable */
+  receiptNumber?: string | null;
+  isFullyCollected: boolean;
+}
+
+export interface UnifiedOrderResponse {
+  client: Client;
+  order: Order;
+}
+
 export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }

@@ -22,4 +22,6 @@ export interface Commission {
   roleType: CommissionRoleType;
   status: CommissionStatusProperty;
   createdAt: Date;
+  /** @nullable */
+  paidAt?: Date | null;
 }

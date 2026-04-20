@@ -23,6 +23,7 @@ type EnrichedCommission = {
   roleType: "SALES" | "DISTRIBUTOR";
   status: "UNPAID" | "PAID";
   createdAt: string;
+  paidAt: string | null;
 };
 
 async function enrich(
@@ -72,6 +73,7 @@ async function enrich(
       roleType: c.roleType,
       status: c.status,
       createdAt: c.createdAt.toISOString(),
+      paidAt: c.paidAt ? c.paidAt.toISOString() : null,
     };
   });
 }
@@ -128,7 +130,7 @@ router.patch("/:id/status", async (req, res) => {
   }
   await db
     .update(commissionsTable)
-    .set({ status })
+    .set({ status, paidAt: status === "PAID" ? new Date() : null })
     .where(eq(commissionsTable.id, id));
   const [refreshed] = await db
     .select()
@@ -156,7 +158,7 @@ router.post("/mark-paid", async (req, res) => {
   }
   await db
     .update(commissionsTable)
-    .set({ status: "PAID" })
+    .set({ status: "PAID", paidAt: new Date() })
     .where(inArray(commissionsTable.id, numericIds));
   const updated = await db
     .select()

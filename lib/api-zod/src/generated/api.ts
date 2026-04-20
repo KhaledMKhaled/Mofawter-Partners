@@ -176,6 +176,7 @@ export const ListCommissionsResponseItem = zod.object({
   roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
+  paidAt: zod.coerce.date().nullish(),
 });
 export const ListCommissionsResponse = zod.array(ListCommissionsResponseItem);
 
@@ -198,6 +199,7 @@ export const UpdateCommissionStatusResponse = zod.object({
   roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
+  paidAt: zod.coerce.date().nullish(),
 });
 
 export const MarkCommissionsPaidBody = zod.object({
@@ -215,6 +217,7 @@ export const MarkCommissionsPaidResponseItem = zod.object({
   roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
   status: zod.enum(["UNPAID", "PAID"]),
   createdAt: zod.coerce.date(),
+  paidAt: zod.coerce.date().nullish(),
 });
 export const MarkCommissionsPaidResponse = zod.array(
   MarkCommissionsPaidResponseItem,
@@ -257,6 +260,7 @@ export const GetDashboardSummaryResponse = zod.object({
       roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
       status: zod.enum(["UNPAID", "PAID"]),
       createdAt: zod.coerce.date(),
+      paidAt: zod.coerce.date().nullish(),
     }),
   ),
 });

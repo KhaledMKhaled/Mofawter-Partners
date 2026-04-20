@@ -176,6 +176,8 @@ export interface Commission {
   roleType: CommissionRoleType;
   status: CommissionStatusProperty;
   createdAt: string;
+  /** @nullable */
+  paidAt?: string | null;
 }
 
 export interface DashboardSummary {

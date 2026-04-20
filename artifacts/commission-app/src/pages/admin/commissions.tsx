@@ -8,8 +8,17 @@ import {
 import { ApiError } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { DollarSign, CheckCircle2, Clock } from "lucide-react";
+import { DollarSign, CheckCircle2, Clock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   Table,
@@ -56,10 +65,26 @@ export default function AdminCommissions() {
 
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "UNPAID" | "PAID">("ALL");
+  const [fromDate, setFromDate] = useState<string>("");
+  const [toDate, setToDate] = useState<string>("");
+
+  const filtered = useMemo(() => {
+    const list = commissions ?? [];
+    const fromTs = fromDate ? new Date(fromDate + "T00:00:00").getTime() : null;
+    const toTs = toDate ? new Date(toDate + "T23:59:59.999").getTime() : null;
+    return list.filter((c) => {
+      if (statusFilter !== "ALL" && c.status !== statusFilter) return false;
+      const ts = new Date(c.createdAt).getTime();
+      if (fromTs !== null && ts < fromTs) return false;
+      if (toTs !== null && ts > toTs) return false;
+      return true;
+    });
+  }, [commissions, statusFilter, fromDate, toDate]);
 
   const unpaidIds = useMemo(
-    () => (commissions ?? []).filter((c) => c.status === "UNPAID").map((c) => c.id),
-    [commissions],
+    () => filtered.filter((c) => c.status === "UNPAID").map((c) => c.id),
+    [filtered],
   );
 
   const selectedUnpaid = useMemo(
@@ -69,12 +94,56 @@ export default function AdminCommissions() {
 
   const totals = useMemo(() => {
     const t = { paid: 0, unpaid: 0 };
-    for (const c of commissions ?? []) {
+    for (const c of filtered) {
       if (c.status === "PAID") t.paid += c.amount;
       else t.unpaid += c.amount;
     }
     return t;
-  }, [commissions]);
+  }, [filtered]);
+
+  const csvEscape = (val: string | number | null | undefined) => {
+    const s = val === null || val === undefined ? "" : String(val);
+    if (/[",\r\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+
+  const handleExportCsv = () => {
+    const headers = [
+      "Earner",
+      "Role",
+      "Source Order",
+      "Order ID",
+      "Client",
+      "Date",
+      "Amount",
+      "Status",
+      "Paid At",
+    ];
+    const rows = filtered.map((c) => [
+      c.userName ?? "",
+      c.roleType,
+      c.orderName ?? "",
+      c.orderId,
+      c.clientName ?? "",
+      format(parseISO(c.createdAt), "yyyy-MM-dd"),
+      c.amount.toFixed(2),
+      c.status,
+      c.paidAt ? format(parseISO(c.paidAt), "yyyy-MM-dd HH:mm:ss") : "",
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvEscape).join(","))
+      .join("\r\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const stamp = format(new Date(), "yyyyMMdd-HHmmss");
+    link.href = url;
+    link.download = `commissions-${stamp}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const toggleOne = (id: number, checked: boolean) => {
     setSelected((prev) => {
@@ -173,24 +242,103 @@ export default function AdminCommissions() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle>Commission Ledger</CardTitle>
             <CardDescription>
               Record of all commission payouts across the company.
             </CardDescription>
           </div>
-          {selectedUnpaid.length > 0 && (
+          <div className="flex items-center gap-2">
             <Button
               size="sm"
-              onClick={() => setConfirmOpen(true)}
-              disabled={markPaid.isPending}
+              variant="outline"
+              onClick={handleExportCsv}
+              disabled={filtered.length === 0}
+              data-testid="button-export-csv"
             >
-              Mark {selectedUnpaid.length} as Paid
+              <Download className="mr-2 h-4 w-4" />
+              Export CSV
             </Button>
-          )}
+            {selectedUnpaid.length > 0 && (
+              <Button
+                size="sm"
+                onClick={() => setConfirmOpen(true)}
+                disabled={markPaid.isPending}
+              >
+                Mark {selectedUnpaid.length} as Paid
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="p-0">
+          <div className="flex flex-wrap items-end gap-3 px-6 pb-4 border-b">
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="filter-status" className="text-xs">
+                Status
+              </Label>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => setStatusFilter(v as "ALL" | "UNPAID" | "PAID")}
+              >
+                <SelectTrigger
+                  id="filter-status"
+                  className="h-9 w-[140px]"
+                  data-testid="select-filter-status"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All statuses</SelectItem>
+                  <SelectItem value="UNPAID">Unpaid</SelectItem>
+                  <SelectItem value="PAID">Paid</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="filter-from" className="text-xs">
+                From
+              </Label>
+              <Input
+                id="filter-from"
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
+                className="h-9 w-[160px]"
+                data-testid="input-filter-from"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="filter-to" className="text-xs">
+                To
+              </Label>
+              <Input
+                id="filter-to"
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                className="h-9 w-[160px]"
+                data-testid="input-filter-to"
+              />
+            </div>
+            {(statusFilter !== "ALL" || fromDate || toDate) && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setStatusFilter("ALL");
+                  setFromDate("");
+                  setToDate("");
+                }}
+                data-testid="button-clear-filters"
+              >
+                Clear
+              </Button>
+            )}
+            <div className="ml-auto text-sm text-muted-foreground">
+              {filtered.length} of {commissions?.length ?? 0} commissions
+            </div>
+          </div>
           {!commissions || commissions.length === 0 ? (
             <Empty
               icon={DollarSign}
@@ -221,7 +369,14 @@ export default function AdminCommissions() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {commissions.map((commission) => {
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                      No commissions match the current filters.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+                {filtered.map((commission) => {
                   const isUnpaid = commission.status === "UNPAID";
                   return (
                     <TableRow key={commission.id}>

@@ -510,6 +510,7 @@ components:
           type: string
           enum: [UNPAID, PAID]
         createdAt: { type: string, format: date-time }
+        paidAt: { type: ["string", "null"], format: date-time }
 
     DashboardSummary:
       type: object

@@ -8,6 +8,9 @@ import commissionsRouter from "./commissions";
 import dashboardRouter from "./dashboard";
 import settingsRouter from "./settings";
 import packagesRouter from "./packages";
+import commissionRulesRouter from "./commission-rules";
+import paymentBatchesRouter from "./payment-batches";
+import auditLogsRouter from "./audit-logs";
 
 const router: IRouter = Router();
 
@@ -20,5 +23,8 @@ router.use("/commissions", commissionsRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/settings", settingsRouter);
 router.use("/packages", packagesRouter);
+router.use("/commission-rules", commissionRulesRouter);
+router.use("/payment-batches", paymentBatchesRouter);
+router.use("/audit-logs", auditLogsRouter);
 
 export default router;

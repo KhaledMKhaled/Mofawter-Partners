@@ -12,7 +12,8 @@ const JWT_SECRET =
       })()
     : "dev-only-change-me-in-prod");
 
-export type AuthRole = "ADMIN" | "DISTRIBUTOR" | "SALES";
+export type AuthRole = "ADMIN" | "OPERATIONS" | "DISTRIBUTOR" | "SALES";
+
 
 export type JwtPayload = {
   sub: number;
@@ -55,6 +56,10 @@ export function toUserDto(user: User) {
     email: user.email,
     role: user.role,
     distributorId: user.distributorId ?? null,
+    phone: user.phone ?? null,
+    internalCode: user.internalCode ?? null,
+    status: user.status,
     createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
   };
 }

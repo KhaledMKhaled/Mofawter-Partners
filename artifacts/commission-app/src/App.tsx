@@ -14,6 +14,10 @@ import AdminUsers from "@/pages/admin/users";
 import AdminClients from "@/pages/admin/clients";
 import AdminCommissions from "@/pages/admin/commissions";
 import AdminSettings from "@/pages/admin/settings";
+import AdminPaymentBatches from "@/pages/admin/payment-batches";
+import AdminCommissionRules from "@/pages/admin/commission-rules";
+import AdminReports from "@/pages/admin/reports";
+import AdminAuditLog from "@/pages/admin/audit-log";
 
 // Distributor Pages
 import DistributorDashboard from "@/pages/distributor/dashboard";
@@ -28,12 +32,21 @@ import SalesClients from "@/pages/sales/clients";
 import SalesOrders from "@/pages/sales/orders";
 import SalesCommissions from "@/pages/sales/commissions";
 
-const queryClient = new QueryClient();
-
+// Shared Pages
 import ClientProfile from "@/pages/shared/client-profile";
 
-function ProtectedRoute({ component: Component, role }: { component: React.ComponentType, role: string | string[] }) {
-  const [location, setLocation] = useLocation();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      staleTime: 30_000,
+    },
+  },
+});
+
+type AllowedRole = string | string[];
+
+function ProtectedRoute({ component: Component, role }: { component: React.ComponentType; role: AllowedRole }) {
   const token = localStorage.getItem("auth_token");
 
   if (!token) {
@@ -43,7 +56,14 @@ function ProtectedRoute({ component: Component, role }: { component: React.Compo
   const { data: user, isLoading, error } = useGetMe();
 
   if (isLoading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <span className="text-sm text-muted-foreground">جارٍ التحميل…</span>
+        </div>
+      </div>
+    );
   }
 
   if (error || !user) {
@@ -54,8 +74,11 @@ function ProtectedRoute({ component: Component, role }: { component: React.Compo
   const hasRole = Array.isArray(role) ? role.includes(user.role) : user.role === role;
 
   if (!hasRole) {
-    // Redirect to their respective dashboard
-    const route = user.role === "ADMIN" ? "/admin" : user.role === "DISTRIBUTOR" ? "/distributor" : "/sales";
+    const route =
+      user.role === "ADMIN" ? "/admin"
+      : user.role === "OPERATIONS" ? "/operations"
+      : user.role === "DISTRIBUTOR" ? "/distributor"
+      : "/sales";
     return <Redirect to={route} />;
   }
 
@@ -66,42 +89,60 @@ function ProtectedRoute({ component: Component, role }: { component: React.Compo
   );
 }
 
+const ADMIN_ROLES = ["ADMIN"];
+const ADMIN_OPS_ROLES = ["ADMIN", "OPERATIONS"];
+const ALL_ROLES = ["ADMIN", "OPERATIONS", "DISTRIBUTOR", "SALES"];
+
 function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
-      
+
       {/* Admin Routes */}
-      <Route path="/admin">{(params) => <ProtectedRoute component={AdminDashboard} role="ADMIN" />}</Route>
-      <Route path="/admin/orders">{(params) => <ProtectedRoute component={AdminOrders} role="ADMIN" />}</Route>
-      <Route path="/admin/users">{(params) => <ProtectedRoute component={AdminUsers} role="ADMIN" />}</Route>
-      <Route path="/admin/clients">{(params) => <ProtectedRoute component={AdminClients} role="ADMIN" />}</Route>
-      <Route path="/admin/commissions">{(params) => <ProtectedRoute component={AdminCommissions} role="ADMIN" />}</Route>
-      <Route path="/admin/settings">{(params) => <ProtectedRoute component={AdminSettings} role="ADMIN" />}</Route>
+      <Route path="/admin">{() => <ProtectedRoute component={AdminDashboard} role={ADMIN_ROLES} />}</Route>
+      <Route path="/admin/orders">{() => <ProtectedRoute component={AdminOrders} role={ADMIN_OPS_ROLES} />}</Route>
+      <Route path="/admin/users">{() => <ProtectedRoute component={AdminUsers} role={ADMIN_ROLES} />}</Route>
+      <Route path="/admin/clients">{() => <ProtectedRoute component={AdminClients} role={ADMIN_OPS_ROLES} />}</Route>
+      <Route path="/admin/commissions">{() => <ProtectedRoute component={AdminCommissions} role={ADMIN_OPS_ROLES} />}</Route>
+      <Route path="/admin/settings">{() => <ProtectedRoute component={AdminSettings} role={ADMIN_ROLES} />}</Route>
+      <Route path="/admin/payment-batches">{() => <ProtectedRoute component={AdminPaymentBatches} role={ADMIN_OPS_ROLES} />}</Route>
+      <Route path="/admin/commission-rules">{() => <ProtectedRoute component={AdminCommissionRules} role={ADMIN_ROLES} />}</Route>
+      <Route path="/admin/reports">{() => <ProtectedRoute component={AdminReports} role={ADMIN_OPS_ROLES} />}</Route>
+      <Route path="/admin/audit-log">{() => <ProtectedRoute component={AdminAuditLog} role={ADMIN_ROLES} />}</Route>
+
+      {/* Operations Routes — same pages as admin for operational sections */}
+      <Route path="/operations">{() => <ProtectedRoute component={AdminDashboard} role={["OPERATIONS"]} />}</Route>
+      <Route path="/operations/orders">{() => <ProtectedRoute component={AdminOrders} role={["OPERATIONS"]} />}</Route>
+      <Route path="/operations/clients">{() => <ProtectedRoute component={AdminClients} role={["OPERATIONS"]} />}</Route>
+      <Route path="/operations/commissions">{() => <ProtectedRoute component={AdminCommissions} role={["OPERATIONS"]} />}</Route>
+      <Route path="/operations/payment-batches">{() => <ProtectedRoute component={AdminPaymentBatches} role={["OPERATIONS"]} />}</Route>
+      <Route path="/operations/reports">{() => <ProtectedRoute component={AdminReports} role={["OPERATIONS"]} />}</Route>
 
       {/* Distributor Routes */}
-      <Route path="/distributor">{(params) => <ProtectedRoute component={DistributorDashboard} role="DISTRIBUTOR" />}</Route>
-      <Route path="/distributor/team">{(params) => <ProtectedRoute component={DistributorTeam} role="DISTRIBUTOR" />}</Route>
-      <Route path="/distributor/clients">{(params) => <ProtectedRoute component={DistributorClients} role="DISTRIBUTOR" />}</Route>
-      <Route path="/distributor/orders">{(params) => <ProtectedRoute component={DistributorOrders} role="DISTRIBUTOR" />}</Route>
-      <Route path="/distributor/commissions">{(params) => <ProtectedRoute component={DistributorCommissions} role="DISTRIBUTOR" />}</Route>
+      <Route path="/distributor">{() => <ProtectedRoute component={DistributorDashboard} role={["DISTRIBUTOR"]} />}</Route>
+      <Route path="/distributor/team">{() => <ProtectedRoute component={DistributorTeam} role={["DISTRIBUTOR"]} />}</Route>
+      <Route path="/distributor/clients">{() => <ProtectedRoute component={DistributorClients} role={["DISTRIBUTOR"]} />}</Route>
+      <Route path="/distributor/orders">{() => <ProtectedRoute component={DistributorOrders} role={["DISTRIBUTOR"]} />}</Route>
+      <Route path="/distributor/commissions">{() => <ProtectedRoute component={DistributorCommissions} role={["DISTRIBUTOR"]} />}</Route>
 
       {/* Sales Routes */}
-      <Route path="/sales">{(params) => <ProtectedRoute component={SalesDashboard} role="SALES" />}</Route>
-      <Route path="/sales/clients">{(params) => <ProtectedRoute component={SalesClients} role="SALES" />}</Route>
-      <Route path="/sales/orders">{(params) => <ProtectedRoute component={SalesOrders} role="SALES" />}</Route>
-      <Route path="/sales/commissions">{(params) => <ProtectedRoute component={SalesCommissions} role="SALES" />}</Route>
+      <Route path="/sales">{() => <ProtectedRoute component={SalesDashboard} role={["SALES"]} />}</Route>
+      <Route path="/sales/clients">{() => <ProtectedRoute component={SalesClients} role={["SALES"]} />}</Route>
+      <Route path="/sales/orders">{() => <ProtectedRoute component={SalesOrders} role={["SALES"]} />}</Route>
+      <Route path="/sales/commissions">{() => <ProtectedRoute component={SalesCommissions} role={["SALES"]} />}</Route>
 
       {/* Shared Protected Routes */}
-      <Route path="/clients/:id">{(params) => <ProtectedRoute component={ClientProfile} role={["ADMIN", "DISTRIBUTOR", "SALES"]} />}</Route>
+      <Route path="/clients/:id">{() => <ProtectedRoute component={ClientProfile} role={ALL_ROLES} />}</Route>
 
+      {/* Root redirect */}
       <Route path="/">
         {() => {
           const token = localStorage.getItem("auth_token");
           if (!token) return <Redirect to="/login" />;
-          return <Redirect to="/admin" />; // Let protected route handle specific redirect
+          return <Redirect to="/admin" />;
         }}
       </Route>
+
       <Route component={NotFound} />
     </Switch>
   );

@@ -6,9 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CreateClientRequest } from "./createClientRequest";
+import type { TaxCardNumber } from "./taxCardNumber";
 
 export interface CreateUnifiedOrderRequest {
-  taxCardNumber: string;
+  taxCardNumber: TaxCardNumber;
   client?: CreateClientRequest;
   packageId: number;
   /** @nullable */

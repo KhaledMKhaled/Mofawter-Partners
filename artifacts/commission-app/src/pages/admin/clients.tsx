@@ -15,7 +15,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { UserSquare2, ArrowRightLeft, History } from "lucide-react";
 import { Link } from "wouter";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
+import { formatDate, formatDateTime } from "@/lib/format";
 
 import {
   Table,
@@ -53,6 +56,7 @@ function userMap(users: User[] | undefined) {
 }
 
 export default function AdminClients() {
+  const { t, locale } = useI18n();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -127,34 +131,33 @@ export default function AdminClients() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Clients</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t.adminClients.title}</h2>
         <p className="text-muted-foreground mt-1">
-          View all clients across the company. Reassign a client to a different
-          sales agent without resetting their 5-year ownership window.
+          {t.adminClients.subtitle}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Clients</CardTitle>
+          <CardTitle>{t.adminClients.allClients}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {!clients || clients.length === 0 ? (
             <Empty
               icon={UserSquare2}
-              title="No clients"
-              description="Sales agents and distributors can add clients."
+              title={t.adminClients.noClients}
+              description={t.adminClients.noClientsDesc}
               className="py-12"
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Sales agent</TableHead>
-                  <TableHead>Distributor</TableHead>
-                  <TableHead>Ownership ends</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t.adminClients.clientTable}</TableHead>
+                  <TableHead>{t.adminClients.salesAgentTable}</TableHead>
+                  <TableHead>{t.adminClients.distributorTable}</TableHead>
+                  <TableHead>{t.adminClients.ownershipEndsTable}</TableHead>
+                  <TableHead className="text-right">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -176,50 +179,50 @@ export default function AdminClients() {
                         >
                           {client.name}
                         </Link>
-                        <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5" dir="ltr">
                           {client.taxCardNumber}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {sales?.name ?? `#${client.assignedSalesId}`}
+                        {sales?.name ?? <span dir="ltr">#{client.assignedSalesId}</span>}
                       </TableCell>
                       <TableCell>
                         {distributor?.name ??
-                          `#${client.assignedDistributorId}`}
+                          <span dir="ltr">#{client.assignedDistributorId}</span>}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <span>{format(endDate, "MMM d, yyyy")}</span>
+                          <span className="whitespace-nowrap">{formatDate(client.ownershipEndDate, locale)}</span>
                           {isExpired ? (
                             <Badge variant="destructive" className="w-fit">
-                              Expired
+                              {t.adminClients.expired}
                             </Badge>
                           ) : (
                             <Badge
                               variant="secondary"
                               className="w-fit bg-blue-100 text-blue-800 hover:bg-blue-100"
                             >
-                              {daysRemaining} days remaining
+                              {t.adminClients.daysRemaining.replace("{days}", String(daysRemaining))}
                             </Badge>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end gap-2 flex-wrap">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => setHistoryClient(client)}
                           >
-                            <History className="mr-2 h-4 w-4" />
-                            History
+                            <History className="me-2 h-4 w-4" />
+                            {t.adminClients.historyBtn}
                           </Button>
                           <Button
                             size="sm"
                             onClick={() => openReassign(client)}
                           >
-                            <ArrowRightLeft className="mr-2 h-4 w-4" />
-                            Reassign
+                            <ArrowRightLeft className="me-2 h-4 w-4" />
+                            {t.adminClients.reassignBtn}
                           </Button>
                         </div>
                       </TableCell>
@@ -238,15 +241,14 @@ export default function AdminClients() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reassign client</DialogTitle>
+            <DialogTitle>{t.adminClients.reassignTitle}</DialogTitle>
             <DialogDescription>
-              Move <strong>{reassignClient?.name}</strong> to another sales
-              agent. The original 5-year ownership window is preserved.
+              {t.adminClients.reassignDesc.replace("{name}", reassignClient?.name || "")}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-4 py-2 text-start">
             <div className="text-sm text-muted-foreground">
-              Currently assigned to{" "}
+              {t.adminClients.currentlyAssigned}{" "}
               <strong>
                 {reassignClient
                   ? usersById.get(reassignClient.assignedSalesId)?.name ??
@@ -259,7 +261,7 @@ export default function AdminClients() {
               onValueChange={setSelectedSalesId}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a sales agent" />
+                <SelectValue placeholder={t.adminClients.chooseAgent} />
               </SelectTrigger>
               <SelectContent>
                 {salesAgents.map((agent) => {
@@ -281,7 +283,7 @@ export default function AdminClients() {
               variant="outline"
               onClick={() => setReassignClient(null)}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button
               onClick={submitReassign}
@@ -291,7 +293,7 @@ export default function AdminClients() {
                 Number(selectedSalesId) === reassignClient?.assignedSalesId
               }
             >
-              {reassign.isPending ? "Reassigning..." : "Reassign"}
+              {reassign.isPending ? t.adminClients.reassigning : t.adminClients.reassignBtn}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -312,6 +314,7 @@ function ClientHistoryDialog({
   client: Client | null;
   onClose: () => void;
 }) {
+  const { t, locale } = useI18n();
   const { data: history, isLoading } = useListClientAssignments(
     client?.id ?? 0,
     {
@@ -328,10 +331,9 @@ function ClientHistoryDialog({
     <Dialog open={!!client} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Reassignment history</DialogTitle>
+          <DialogTitle>{t.adminClients.historyTitle}</DialogTitle>
           <DialogDescription>
-            Audit log of every reassignment for{" "}
-            <strong>{client?.name}</strong>.
+            {t.adminClients.historyDesc.replace("{name}", client?.name || "")}
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-[60vh] overflow-y-auto">
@@ -344,32 +346,32 @@ function ClientHistoryDialog({
           ) : !history || history.length === 0 ? (
             <Empty
               icon={History}
-              title="No reassignments yet"
-              description="This client has not been reassigned since being added."
+              title={t.adminClients.noHistory}
+              description={t.adminClients.noHistoryDesc}
               className="py-8"
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>When</TableHead>
-                  <TableHead>From</TableHead>
-                  <TableHead>To</TableHead>
-                  <TableHead>By</TableHead>
+                  <TableHead>{t.adminClients.when}</TableHead>
+                  <TableHead>{t.adminClients.from}</TableHead>
+                  <TableHead>{t.adminClients.to}</TableHead>
+                  <TableHead>{t.adminClients.by}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {history.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="whitespace-nowrap">
-                      {format(parseISO(entry.createdAt), "MMM d, yyyy h:mm a")}
+                      {formatDateTime(entry.createdAt, locale)}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span>
                           {entry.fromSalesName ??
                             (entry.fromSalesId
-                              ? `#${entry.fromSalesId}`
+                              ? <span dir="ltr">#{entry.fromSalesId}</span>
                               : "—")}
                         </span>
                         {entry.fromDistributorName && (
@@ -382,7 +384,7 @@ function ClientHistoryDialog({
                     <TableCell>
                       <div className="flex flex-col">
                         <span>
-                          {entry.toSalesName ?? `#${entry.toSalesId}`}
+                          {entry.toSalesName ?? <span dir="ltr">#{entry.toSalesId}</span>}
                         </span>
                         {entry.toDistributorName && (
                           <span className="text-xs text-muted-foreground">
@@ -392,7 +394,7 @@ function ClientHistoryDialog({
                       </div>
                     </TableCell>
                     <TableCell>
-                      {entry.changedByName ?? `#${entry.changedById}`}
+                      {entry.changedByName ?? <span dir="ltr">#{entry.changedById}</span>}
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -70,118 +71,167 @@
 :root {
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
-
-  /* Automatic computation of border around primary / danger buttons */
-  --opaque-button-border-intensity: -8; /* In terms of percentages */
-
-  /* Backgrounds applied on top of other backgrounds when hovered/active */
+  --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: red; /*replace with H S L */
+  /* Deep Slate / Navy background */
+  --background: 220 20% 97%;
+  --foreground: 222 47% 11%;
+  --border: 220 14% 88%;
+  --input: 220 14% 84%;
+  --ring: 162 84% 39%;
 
-  --foreground: red; /*replace with H S L */
+  /* Cards — crisp white */
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 220 14% 90%;
 
-  --border: red; /*replace with H S L */
+  /* Sidebar — deep navy */
+  --sidebar: 222 47% 11%;
+  --sidebar-foreground: 210 30% 85%;
+  --sidebar-border: 222 40% 18%;
+  --sidebar-primary: 162 84% 39%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 222 40% 18%;
+  --sidebar-accent-foreground: 210 30% 85%;
+  --sidebar-ring: 162 84% 39%;
 
-  --card: red; /*replace with H S L */
+  /* Popover */
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 220 14% 88%;
 
-  --card-foreground: red; /*replace with H S L */
+  /* Primary — Emerald Teal */
+  --primary: 162 84% 39%;
+  --primary-foreground: 0 0% 100%;
 
-  --card-border: red; /*replace with H S L */
+  /* Secondary — soft slate */
+  --secondary: 220 14% 93%;
+  --secondary-foreground: 222 47% 20%;
 
-  --sidebar: red; /*replace with H S L */
+  /* Muted */
+  --muted: 220 14% 95%;
+  --muted-foreground: 220 12% 50%;
 
-  --sidebar-foreground: red; /*replace with H S L */
+  /* Accent — cool indigo */
+  --accent: 243 75% 95%;
+  --accent-foreground: 243 75% 35%;
 
-  --sidebar-border: red; /*replace with H S L */
+  /* Destructive — warm red */
+  --destructive: 4 86% 58%;
+  --destructive-foreground: 0 0% 100%;
 
-  --sidebar-primary: red; /*replace with H S L */
+  /* Charts */
+  --chart-1: 162 84% 39%;
+  --chart-2: 243 75% 58%;
+  --chart-3: 38 92% 50%;
+  --chart-4: 4 86% 58%;
+  --chart-5: 199 89% 48%;
 
-  --sidebar-primary-foreground: red; /*replace with H S L */
-
-  --sidebar-accent: red; /*replace with H S L */
-
-  --sidebar-accent-foreground: red; /*replace with H S L */
-
-  --sidebar-ring: red; /*replace with H S L */
-
-  --popover: red; /*replace with H S L */
-
-  --popover-foreground: red; /*replace with H S L */
-
-  --popover-border: red; /*replace with H S L */
-
-  --primary: red; /*replace with H S L */
-
-  --primary-foreground: red; /*replace with H S L */
-
-  --secondary: red; /*replace with H S L */
-
-  --secondary-foreground: red; /*replace with H S L */
-
-  --muted: red; /*replace with H S L */
-
-  --muted-foreground: red; /*replace with H S L */
-
-  --accent: red; /*replace with H S L */
-
-  --accent-foreground: red; /*replace with H S L */
-
-  --destructive: red; /*replace with H S L */
-
-  --destructive-foreground: red; /*replace with H S L */
-
-  --input: red; /*replace with H S L */
-  --ring: red; /*replace with H S L */
-  --chart-1: red; /*replace with H S L */
-  --chart-2: red; /*replace with H S L */
-  --chart-3: red; /*replace with H S L */
-  --chart-4: red; /*replace with H S L */
-  --chart-5: red; /*replace with H S L */
-
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
-  --app-font-mono: Menlo, monospace;
-  --radius: .5rem; /* 8px */
-  --shadow-2xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00); /*replace with H S L */
-  --shadow-xs: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00); /*replace with H S L */
-  --shadow-sm: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 1px 2px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-md: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 2px 4px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-lg: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 4px 6px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00), 0px 8px 10px -1px hsl(202.8169 89.1213% 53.1373% / 0.00);
-  --shadow-2xl: 0px 2px 0px 0px hsl(202.8169 89.1213% 53.1373% / 0.00);
+  --app-font-mono: 'JetBrains Mono', Menlo, monospace;
+  --radius: 0.625rem;
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.07), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.12);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.20);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
-  /* Automatically computed borders - intensity can be controlled by the user by the --opaque-button-border-intensity setting */
-
-  /* Fallback for older browsers */
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --primary-border: hsl(var(--primary));
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --secondary-border: hsl(var(--secondary));
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --muted-border: hsl(var(--muted));
   --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
-
-  /* Fallback for older browsers */
   --accent-border: hsl(var(--accent));
   --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --destructive-border: hsl(var(--destructive));
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
 
-  /* Fallback for older browsers */
+.dark {
+  --button-outline: rgba(255,255,255, .10);
+  --badge-outline: rgba(255,255,255, .05);
+  --opaque-button-border-intensity: 9;
+  --elevate-1: rgba(255,255,255, .04);
+  --elevate-2: rgba(255,255,255, .09);
+
+  --background: 222 47% 8%;
+  --foreground: 210 30% 92%;
+  --border: 222 35% 18%;
+  --input: 222 35% 20%;
+  --ring: 162 84% 45%;
+
+  --card: 222 40% 12%;
+  --card-foreground: 210 30% 90%;
+  --card-border: 222 35% 18%;
+
+  --sidebar: 222 47% 7%;
+  --sidebar-foreground: 210 30% 75%;
+  --sidebar-border: 222 40% 14%;
+  --sidebar-primary: 162 84% 45%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 222 40% 14%;
+  --sidebar-accent-foreground: 210 30% 80%;
+  --sidebar-ring: 162 84% 45%;
+
+  --popover: 222 40% 12%;
+  --popover-foreground: 210 30% 90%;
+  --popover-border: 222 35% 18%;
+
+  --primary: 162 84% 45%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 222 35% 18%;
+  --secondary-foreground: 210 30% 80%;
+
+  --muted: 222 35% 15%;
+  --muted-foreground: 220 14% 55%;
+
+  --accent: 243 50% 25%;
+  --accent-foreground: 243 75% 80%;
+
+  --destructive: 4 72% 52%;
+  --destructive-foreground: 0 0% 100%;
+
+  --chart-1: 162 84% 45%;
+  --chart-2: 243 75% 65%;
+  --chart-3: 38 92% 55%;
+  --chart-4: 4 86% 62%;
+  --chart-5: 199 89% 52%;
+
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+  --shadow-xs: 0 1px 3px 0 rgb(0 0 0 / 0.25);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.2);
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.18);
+  --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+
+  --sidebar-primary-border: hsl(var(--sidebar-primary));
+  --sidebar-primary-border: hsl(from hsl(var(--sidebar-primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --sidebar-accent-border: hsl(var(--sidebar-accent));
+  --sidebar-accent-border: hsl(from hsl(var(--sidebar-accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --primary-border: hsl(var(--primary));
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(var(--secondary));
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --muted-border: hsl(var(--muted));
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --accent-border: hsl(var(--accent));
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --destructive-border: hsl(var(--destructive));
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
@@ -390,4 +440,111 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+}
+
+/* ── Arabic / RTL Support ──────────────────────────────────────── */
+
+/* When dir=rtl is on <html>, flip all flex gaps and text alignment */
+[dir="rtl"] {
+  text-align: right;
+}
+
+/* Mixed content: keep numbers, IDs, and latin text LTR within RTL context */
+[dir="rtl"] .font-mono,
+[dir="rtl"] code,
+[dir="rtl"] [data-ltr],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="number"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Keep badge and code snippets inline-block in RTL */
+[dir="rtl"] .inline-flex {
+  /* flex-direction already works in RTL */
+}
+
+/* Fix icon + text spacing in RTL: swap mr-* to ms-* / ml-* to me-* */
+[dir="rtl"] .mr-2 {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+[dir="rtl"] .ml-2 {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+[dir="rtl"] .mr-1 {
+  margin-right: 0;
+  margin-left: 0.25rem;
+}
+[dir="rtl"] .ml-1 {
+  margin-left: 0;
+  margin-right: 0.25rem;
+}
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Fix table text alignment for RTL */
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+/* Sidebar: fix border side in RTL */
+[dir="rtl"] .border-r {
+  border-right: 0;
+  border-left: 1px solid hsl(var(--border));
+}
+[dir="rtl"] .border-l {
+  border-left: 0;
+  border-right: 1px solid hsl(var(--border));
+}
+
+/* Keep brand name LTR */
+[dir="rtl"] .brand-name {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* When English is active, use Inter as primary */
+html.lang-en {
+  --app-font-sans: 'Inter', 'IBM Plex Sans Arabic', sans-serif;
+}
+
+/* Smooth language transition */
+* {
+  transition-property: none;
+}
+
+/* RTL-aware flex justify for table footers */
+[dir="rtl"] .justify-end {
+  /* Tailwind handles this, kept as documentation */
+}
+
+/* Fix arrow icons in RTL */
+[dir="rtl"] .lucide-chevron-right {
+  transform: scaleX(-1);
+}
+[dir="rtl"] .lucide-chevron-left {
+  transform: scaleX(-1);
+}
+[dir="rtl"] .lucide-arrow-right {
+  transform: scaleX(-1);
+}
+[dir="rtl"] .lucide-arrow-left {
+  transform: scaleX(-1);
+}
+
+/* Fix rotate for audit log arrows */
+[dir="rtl"] .rotate-\[-90deg\] {
+  transform: rotate(90deg);
 }

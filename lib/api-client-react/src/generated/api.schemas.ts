@@ -50,10 +50,16 @@ export interface CreateUserRequest {
   distributorId?: number | null;
 }
 
+/**
+ * Tax card number must contain digits only.
+ * @pattern ^\d+$
+ */
+export type TaxCardNumber = string;
+
 export interface Client {
   id: number;
   name: string;
-  taxCardNumber: string;
+  taxCardNumber: TaxCardNumber;
   taxCardName: string;
   issuingAuthority: string;
   commercialRegistryNumber: string;
@@ -75,7 +81,7 @@ export interface Client {
 
 export interface UpdateClientRequest {
   name?: string;
-  taxCardNumber?: string;
+  taxCardNumber?: TaxCardNumber;
   taxCardName?: string;
   issuingAuthority?: string;
   commercialRegistryNumber?: string;
@@ -92,7 +98,7 @@ export interface UpdateClientRequest {
 
 export interface CreateClientRequest {
   name: string;
-  taxCardNumber: string;
+  taxCardNumber: TaxCardNumber;
   taxCardName: string;
   issuingAuthority: string;
   commercialRegistryNumber: string;
@@ -150,35 +156,95 @@ export interface Order {
   createdAt: string;
 }
 
+export type CommissionRoleType =
+  (typeof CommissionRoleType)[keyof typeof CommissionRoleType];
+
+export const CommissionRoleType = {
+  DISTRIBUTOR: "DISTRIBUTOR",
+  SALES: "SALES",
+} as const;
+
+export type CommissionStatusProperty =
+  (typeof CommissionStatusProperty)[keyof typeof CommissionStatusProperty];
+
+export const CommissionStatusProperty = {
+  UNPAID: "UNPAID",
+  PAID: "PAID",
+} as const;
+
+export interface Commission {
+  id: number;
+  orderId: number;
+  /** @nullable */
+  orderName?: string | null;
+  /** @nullable */
+  clientName?: string | null;
+  userId: number;
+  /** @nullable */
+  userName?: string | null;
+  amount: number;
+  roleType: CommissionRoleType;
+  status: CommissionStatusProperty;
+  createdAt: string;
+  /** @nullable */
+  paidAt?: string | null;
+  /** @nullable */
+  paidByUserId?: number | null;
+  /** @nullable */
+  paidByName?: string | null;
+}
+
+export interface ClientFinancialTotals {
+  subtotal: number;
+  vatTotal: number;
+  collectedTotal: number;
+  outstandingTotal: number;
+}
+
+export type ClientFinancialTimelineEventType =
+  (typeof ClientFinancialTimelineEventType)[keyof typeof ClientFinancialTimelineEventType];
+
+export const ClientFinancialTimelineEventType = {
+  ORDER_CREATED: "ORDER_CREATED",
+  ORDER_STATUS_CHANGED: "ORDER_STATUS_CHANGED",
+  COMMISSION_GENERATED: "COMMISSION_GENERATED",
+  COMMISSION_PAID: "COMMISSION_PAID",
+} as const;
+
+/**
+ * @nullable
+ */
+export type ClientFinancialTimelineEventCommissionStatus =
+  | (typeof ClientFinancialTimelineEventCommissionStatus)[keyof typeof ClientFinancialTimelineEventCommissionStatus]
+  | null;
+
+export const ClientFinancialTimelineEventCommissionStatus = {
+  UNPAID: "UNPAID",
+  PAID: "PAID",
+} as const;
+
+export interface ClientFinancialTimelineEvent {
+  type: ClientFinancialTimelineEventType;
+  occurredAt: string;
+  /** @nullable */
+  orderId: number | null;
+  /** @nullable */
+  orderName: string | null;
+  /** @nullable */
+  commissionId: number | null;
+  /** @nullable */
+  commissionStatus: ClientFinancialTimelineEventCommissionStatus;
+  /** @nullable */
+  amount: number | null;
+  details: string;
+}
+
 export interface Client360Profile {
   client: Client;
   orders: Order[];
   commissions: Commission[];
-  financials: {
-    subtotal: number;
-    vatTotal: number;
-    collectedTotal: number;
-    outstandingTotal: number;
-  };
-  timeline: Array<{
-    type:
-      | "ORDER_CREATED"
-      | "ORDER_STATUS_CHANGED"
-      | "COMMISSION_GENERATED"
-      | "COMMISSION_PAID";
-    occurredAt: string;
-    /** @nullable */
-    orderId: number | null;
-    /** @nullable */
-    orderName: string | null;
-    /** @nullable */
-    commissionId: number | null;
-    /** @nullable */
-    commissionStatus: "UNPAID" | "PAID" | null;
-    /** @nullable */
-    amount: number | null;
-    details: string;
-  }>;
+  financials: ClientFinancialTotals;
+  timeline: ClientFinancialTimelineEvent[];
 }
 
 export interface ReassignClientRequest {
@@ -239,7 +305,7 @@ export interface CreateOrderRequest {
 }
 
 export interface CreateUnifiedOrderRequest {
-  taxCardNumber: string;
+  taxCardNumber: TaxCardNumber;
   client?: CreateClientRequest;
   packageId: number;
   /** @nullable */
@@ -270,44 +336,6 @@ export interface UpdateCommissionStatusRequest {
 
 export interface MarkCommissionsPaidRequest {
   ids: number[];
-}
-
-export type CommissionRoleType =
-  (typeof CommissionRoleType)[keyof typeof CommissionRoleType];
-
-export const CommissionRoleType = {
-  DISTRIBUTOR: "DISTRIBUTOR",
-  SALES: "SALES",
-} as const;
-
-export type CommissionStatusProperty =
-  (typeof CommissionStatusProperty)[keyof typeof CommissionStatusProperty];
-
-export const CommissionStatusProperty = {
-  UNPAID: "UNPAID",
-  PAID: "PAID",
-} as const;
-
-export interface Commission {
-  id: number;
-  orderId: number;
-  /** @nullable */
-  orderName?: string | null;
-  /** @nullable */
-  clientName?: string | null;
-  userId: number;
-  /** @nullable */
-  userName?: string | null;
-  amount: number;
-  roleType: CommissionRoleType;
-  status: CommissionStatusProperty;
-  createdAt: string;
-  /** @nullable */
-  paidAt?: string | null;
-  /** @nullable */
-  paidByUserId?: number | null;
-  /** @nullable */
-  paidByName?: string | null;
 }
 
 export interface DashboardSummary {
@@ -344,5 +372,5 @@ export const ListUsersRole = {
 } as const;
 
 export type LookupClientParams = {
-  taxCardNumber: string;
+  taxCardNumber: TaxCardNumber;
 };

@@ -11,6 +11,8 @@ import { aliasedTable } from "drizzle-orm";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { normalizeTaxCardNumber } from "../lib/tax-card";
+import { calculateOwnershipEndDate } from "../lib/ownership";
+import { logAudit } from "../lib/audit";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -22,11 +24,7 @@ function isValidTaxCardNumber(value: string): boolean {
   return TAX_CARD_DIGITS_ONLY_REGEX.test(value);
 }
 
-function addFiveYears(start: Date): Date {
-  const end = new Date(start);
-  end.setFullYear(end.getFullYear() + 5);
-  return end;
-}
+
 
 function toDto(c: typeof clientsTable.$inferSelect) {
   return {
@@ -48,7 +46,10 @@ function toDto(c: typeof clientsTable.$inferSelect) {
     assignedDistributorId: c.assignedDistributorId,
     ownershipStartDate: c.ownershipStartDate.toISOString(),
     ownershipEndDate: c.ownershipEndDate.toISOString(),
+    ownershipRuleType: c.ownershipRuleType,
+    ownershipStatus: c.ownershipStatus,
     createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
   };
 }
 
@@ -168,7 +169,7 @@ router.post("/", async (req, res, next) => {
     }
 
     const start = new Date();
-    const end = addFiveYears(start);
+    const end = calculateOwnershipEndDate(start, 60);
     try {
       const [created] = await db
         .insert(clientsTable)
@@ -190,6 +191,8 @@ router.post("/", async (req, res, next) => {
           assignedDistributorId: sales.distributorId,
           ownershipStartDate: start,
           ownershipEndDate: end,
+          ownershipRuleType: "FIXED",
+          ownershipStatus: "ACTIVE",
         })
         .returning();
       res.status(201).json(toDto(created));

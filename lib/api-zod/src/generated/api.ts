@@ -63,10 +63,15 @@ export const CreateUserBody = zod.object({
   distributorId: zod.number().nullish(),
 });
 
+export const listClientsResponseTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const ListClientsResponseItem = zod.object({
   id: zod.number(),
   name: zod.string(),
-  taxCardNumber: zod.string(),
+  taxCardNumber: zod
+    .string()
+    .regex(listClientsResponseTaxCardNumberRegExp)
+    .describe("Tax card number must contain digits only."),
   taxCardName: zod.string(),
   issuingAuthority: zod.string(),
   commercialRegistryNumber: zod.string(),
@@ -86,9 +91,14 @@ export const ListClientsResponseItem = zod.object({
 });
 export const ListClientsResponse = zod.array(ListClientsResponseItem);
 
+export const createClientBodyTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const CreateClientBody = zod.object({
   name: zod.string(),
-  taxCardNumber: zod.string(),
+  taxCardNumber: zod
+    .string()
+    .regex(createClientBodyTaxCardNumberRegExp)
+    .describe("Tax card number must contain digits only."),
   taxCardName: zod.string(),
   issuingAuthority: zod.string(),
   commercialRegistryNumber: zod.string(),
@@ -103,9 +113,17 @@ export const CreateClientBody = zod.object({
   assignedSalesId: zod.number().nullish(),
 });
 
+export const lookupClientQueryTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const LookupClientQueryParams = zod.object({
-  taxCardNumber: zod.coerce.string(),
+  taxCardNumber: zod.coerce
+    .string()
+    .regex(lookupClientQueryTaxCardNumberRegExp),
 });
+
+export const lookupClientResponseClientTaxCardNumberRegExp = new RegExp(
+  "^\\d+$",
+);
 
 export const LookupClientResponse = zod.object({
   found: zod.boolean(),
@@ -113,7 +131,10 @@ export const LookupClientResponse = zod.object({
     .object({
       id: zod.number(),
       name: zod.string(),
-      taxCardNumber: zod.string(),
+      taxCardNumber: zod
+        .string()
+        .regex(lookupClientResponseClientTaxCardNumberRegExp)
+        .describe("Tax card number must contain digits only."),
       taxCardName: zod.string(),
       issuingAuthority: zod.string(),
       commercialRegistryNumber: zod.string(),
@@ -139,11 +160,18 @@ export const GetClientProfileParams = zod.object({
   id: zod.coerce.number(),
 });
 
+export const getClientProfileResponseClientTaxCardNumberRegExp = new RegExp(
+  "^\\d+$",
+);
+
 export const GetClientProfileResponse = zod.object({
   client: zod.object({
     id: zod.number(),
     name: zod.string(),
-    taxCardNumber: zod.string(),
+    taxCardNumber: zod
+      .string()
+      .regex(getClientProfileResponseClientTaxCardNumberRegExp)
+      .describe("Tax card number must contain digits only."),
     taxCardName: zod.string(),
     issuingAuthority: zod.string(),
     commercialRegistryNumber: zod.string(),
@@ -182,15 +210,63 @@ export const GetClientProfileResponse = zod.object({
       createdAt: zod.coerce.date(),
     }),
   ),
+  commissions: zod.array(
+    zod.object({
+      id: zod.number(),
+      orderId: zod.number(),
+      orderName: zod.string().nullish(),
+      clientName: zod.string().nullish(),
+      userId: zod.number(),
+      userName: zod.string().nullish(),
+      amount: zod.number(),
+      roleType: zod.enum(["DISTRIBUTOR", "SALES"]),
+      status: zod.enum(["UNPAID", "PAID"]),
+      createdAt: zod.coerce.date(),
+      paidAt: zod.coerce.date().nullish(),
+      paidByUserId: zod.number().nullish(),
+      paidByName: zod.string().nullish(),
+    }),
+  ),
+  financials: zod.object({
+    subtotal: zod.number(),
+    vatTotal: zod.number(),
+    collectedTotal: zod.number(),
+    outstandingTotal: zod.number(),
+  }),
+  timeline: zod.array(
+    zod.object({
+      type: zod.enum([
+        "ORDER_CREATED",
+        "ORDER_STATUS_CHANGED",
+        "COMMISSION_GENERATED",
+        "COMMISSION_PAID",
+      ]),
+      occurredAt: zod.coerce.date(),
+      orderId: zod.number().nullable(),
+      orderName: zod.string().nullable(),
+      commissionId: zod.number().nullable(),
+      commissionStatus: zod
+        .union([zod.literal("UNPAID"), zod.literal("PAID"), zod.literal(null)])
+        .nullable(),
+      amount: zod.number().nullable(),
+      details: zod.string(),
+    }),
+  ),
 });
 
 export const UpdateClientParams = zod.object({
   id: zod.coerce.number(),
 });
 
+export const updateClientBodyTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const UpdateClientBody = zod.object({
   name: zod.string().optional(),
-  taxCardNumber: zod.string().optional(),
+  taxCardNumber: zod
+    .string()
+    .regex(updateClientBodyTaxCardNumberRegExp)
+    .optional()
+    .describe("Tax card number must contain digits only."),
   taxCardName: zod.string().optional(),
   issuingAuthority: zod.string().optional(),
   commercialRegistryNumber: zod.string().optional(),
@@ -204,10 +280,15 @@ export const UpdateClientBody = zod.object({
   address: zod.string().optional(),
 });
 
+export const updateClientResponseTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const UpdateClientResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
-  taxCardNumber: zod.string(),
+  taxCardNumber: zod
+    .string()
+    .regex(updateClientResponseTaxCardNumberRegExp)
+    .describe("Tax card number must contain digits only."),
   taxCardName: zod.string(),
   issuingAuthority: zod.string(),
   commercialRegistryNumber: zod.string(),
@@ -234,10 +315,15 @@ export const ReassignClientBody = zod.object({
   assignedSalesId: zod.number(),
 });
 
+export const reassignClientResponseTaxCardNumberRegExp = new RegExp("^\\d+$");
+
 export const ReassignClientResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
-  taxCardNumber: zod.string(),
+  taxCardNumber: zod
+    .string()
+    .regex(reassignClientResponseTaxCardNumberRegExp)
+    .describe("Tax card number must contain digits only."),
   taxCardName: zod.string(),
   issuingAuthority: zod.string(),
   commercialRegistryNumber: zod.string(),
@@ -347,12 +433,23 @@ export const CreateOrderBody = zod.object({
   isFullyCollected: zod.boolean(),
 });
 
+export const createUnifiedOrderBodyTaxCardNumberRegExp = new RegExp("^\\d+$");
+export const createUnifiedOrderBodyClientTaxCardNumberRegExp = new RegExp(
+  "^\\d+$",
+);
+
 export const CreateUnifiedOrderBody = zod.object({
-  taxCardNumber: zod.string(),
+  taxCardNumber: zod
+    .string()
+    .regex(createUnifiedOrderBodyTaxCardNumberRegExp)
+    .describe("Tax card number must contain digits only."),
   client: zod
     .object({
       name: zod.string(),
-      taxCardNumber: zod.string(),
+      taxCardNumber: zod
+        .string()
+        .regex(createUnifiedOrderBodyClientTaxCardNumberRegExp)
+        .describe("Tax card number must contain digits only."),
       taxCardName: zod.string(),
       issuingAuthority: zod.string(),
       commercialRegistryNumber: zod.string(),

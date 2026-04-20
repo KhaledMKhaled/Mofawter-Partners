@@ -7,6 +7,12 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 
+export const OWNERSHIP_RULE_TYPES = ["FIXED", "RENEWABLE", "MANUAL_OVERRIDE"] as const;
+export type OwnershipRuleType = (typeof OWNERSHIP_RULE_TYPES)[number];
+
+export const OWNERSHIP_STATUSES = ["ACTIVE", "EXPIRED", "OVERRIDDEN"] as const;
+export type OwnershipStatus = (typeof OWNERSHIP_STATUSES)[number];
+
 export const clientsTable = pgTable("clients", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -29,7 +35,16 @@ export const clientsTable = pgTable("clients", {
     .defaultNow(),
   ownershipEndDate: timestamp("ownership_end_date", { withTimezone: true })
     .notNull(),
+  ownershipRuleType: text("ownership_rule_type", { enum: OWNERSHIP_RULE_TYPES })
+    .notNull()
+    .default("FIXED"),
+  ownershipStatus: text("ownership_status", { enum: OWNERSHIP_STATUSES })
+    .notNull()
+    .default("ACTIVE"),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
 });

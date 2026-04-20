@@ -23,8 +23,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/lib/i18n";
+import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 
 export default function ClientProfile() {
+  const { t, locale } = useI18n();
   const { id } = useParams<{ id: string }>();
   const clientId = Number(id);
   const [activeTab, setActiveTab] = useState("overview");
@@ -55,8 +58,8 @@ export default function ClientProfile() {
       <Card className="border-red-200 bg-red-50">
         <CardContent className="pt-6 text-center">
           <BadgeAlert className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h2 className="text-xl font-bold text-red-900">Client Not Found</h2>
-          <p className="text-red-700 mt-2">The client you requested cannot be found or you do not have permission to view it.</p>
+          <h2 className="text-xl font-bold text-red-900">{t.clientProfile.clientNotFound}</h2>
+          <p className="text-red-700 mt-2">{t.clientProfile.clientNotFoundDesc}</p>
         </CardContent>
       </Card>
     );
@@ -73,12 +76,12 @@ export default function ClientProfile() {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{client.name}</h2>
           <div className="flex items-center gap-2 mt-2">
-            <Badge variant="outline" className="font-mono text-xs">{client.taxCardNumber}</Badge>
+            <Badge variant="outline" className="font-mono text-xs" dir="ltr">{client.taxCardNumber}</Badge>
             {isExpired ? (
-              <Badge variant="destructive">Ownership Expired</Badge>
+              <Badge variant="destructive">{t.clientProfile.ownershipExpired}</Badge>
             ) : (
               <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-transparent">
-                Ownership active ({daysRemaining} days)
+                {t.clientProfile.ownershipActive.replace("{days}", String(daysRemaining))}
               </Badge>
             )}
           </div>
@@ -87,10 +90,10 @@ export default function ClientProfile() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview (360°)</TabsTrigger>
-          <TabsTrigger value="financial">Financial 360</TabsTrigger>
-          <TabsTrigger value="orders">Network Orders</TabsTrigger>
-          <TabsTrigger value="history">Assignment History</TabsTrigger>
+          <TabsTrigger value="overview">{t.clientProfile.overviewTab}</TabsTrigger>
+          <TabsTrigger value="financial">{t.clientProfile.financialTab}</TabsTrigger>
+          <TabsTrigger value="orders">{t.clientProfile.ordersTab}</TabsTrigger>
+          <TabsTrigger value="history">{t.clientProfile.historyTab}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -98,14 +101,14 @@ export default function ClientProfile() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                  <UserSquare2 className="mr-2 h-4 w-4" /> Contact
+                  <UserSquare2 className="me-2 h-4 w-4" /> {t.clientProfile.contact}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <p className="flex items-center"><Mail className="mr-3 h-4 w-4 text-muted-foreground"/> {client.email}</p>
-                  <p className="flex items-center"><Phone className="mr-3 h-4 w-4 text-muted-foreground"/> {client.phone1} {client.phone1WhatsApp && '(WhatsApp)'}</p>
-                  {client.phone2 && <p className="flex items-center"><Phone className="mr-3 h-4 w-4 text-muted-foreground"/> {client.phone2} {client.phone2WhatsApp && '(WhatsApp)'}</p>}
+                  <p className="flex items-center"><Mail className="me-3 h-4 w-4 text-muted-foreground"/> <span dir="ltr">{client.email}</span></p>
+                  <p className="flex items-center"><Phone className="me-3 h-4 w-4 text-muted-foreground"/> <span dir="ltr">{client.phone1}</span> {client.phone1WhatsApp && '(WhatsApp)'}</p>
+                  {client.phone2 && <p className="flex items-center"><Phone className="me-3 h-4 w-4 text-muted-foreground"/> <span dir="ltr">{client.phone2}</span> {client.phone2WhatsApp && '(WhatsApp)'}</p>}
                 </div>
               </CardContent>
             </Card>
@@ -113,15 +116,15 @@ export default function ClientProfile() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                  <Building2 className="mr-2 h-4 w-4" /> Business Info
+                  <Building2 className="me-2 h-4 w-4" /> {t.clientProfile.businessInfo}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <p><span className="text-muted-foreground">Type:</span> {client.businessType}</p>
-                  <p><span className="text-muted-foreground">Tax Name:</span> {client.taxCardName}</p>
-                  <p><span className="text-muted-foreground">CR Number:</span> {client.commercialRegistryNumber}</p>
-                  <p><span className="text-muted-foreground">Authority:</span> {client.issuingAuthority}</p>
+                  <p><span className="text-muted-foreground">{t.clientProfile.type}:</span> {client.businessType}</p>
+                  <p><span className="text-muted-foreground">{t.clientProfile.taxName}:</span> {client.taxCardName}</p>
+                  <p><span className="text-muted-foreground">{t.clientProfile.crNumber}:</span> <span dir="ltr">{client.commercialRegistryNumber}</span></p>
+                  <p><span className="text-muted-foreground">{t.clientProfile.authority}:</span> {client.issuingAuthority}</p>
                 </div>
               </CardContent>
             </Card>
@@ -129,13 +132,13 @@ export default function ClientProfile() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground flex items-center">
-                  <MapPin className="mr-2 h-4 w-4" /> Location & Identity
+                  <MapPin className="me-2 h-4 w-4" /> {t.clientProfile.locationIdentity}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-sm">
-                  <p className="flex items-start"><MapPin className="mr-3 h-4 w-4 text-muted-foreground mt-0.5 shrink-0"/> <span className="line-clamp-3">{client.address}</span></p>
-                  <p className="flex items-center mt-2"><Key className="mr-3 h-4 w-4 text-muted-foreground"/> {client.nationalId}</p>
+                  <p className="flex items-start"><MapPin className="me-3 h-4 w-4 text-muted-foreground mt-0.5 shrink-0"/> <span className="line-clamp-3">{client.address}</span></p>
+                  <p className="flex items-center mt-2"><Key className="me-3 h-4 w-4 text-muted-foreground"/> <span dir="ltr">{client.nationalId}</span></p>
                 </div>
               </CardContent>
             </Card>
@@ -146,74 +149,76 @@ export default function ClientProfile() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Subtotal</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{t.clientProfile.subtotal}</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-bold">
-                ${Number(profileData.financials?.subtotal ?? 0).toFixed(2)}
+                {formatCurrency(profileData.financials?.subtotal ?? 0, locale)}
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">VAT Total</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{t.clientProfile.vatTotal}</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-bold">
-                ${Number(profileData.financials?.vatTotal ?? 0).toFixed(2)}
+                {formatCurrency(profileData.financials?.vatTotal ?? 0, locale)}
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Collected</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{t.clientProfile.collected}</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-bold text-green-700">
-                ${Number(profileData.financials?.collectedTotal ?? 0).toFixed(2)}
+                {formatCurrency(profileData.financials?.collectedTotal ?? 0, locale)}
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Outstanding</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{t.clientProfile.outstanding}</CardTitle>
               </CardHeader>
               <CardContent className="text-2xl font-bold text-amber-700">
-                ${Number(profileData.financials?.outstandingTotal ?? 0).toFixed(2)}
+                {formatCurrency(profileData.financials?.outstandingTotal ?? 0, locale)}
               </CardContent>
             </Card>
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Financial Timeline</CardTitle>
-              <CardDescription>All monetary events linked to this client.</CardDescription>
+              <CardTitle>{t.clientProfile.financialTimeline}</CardTitle>
+              <CardDescription>{t.clientProfile.financialTimelineDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               {!profileData.timeline || profileData.timeline.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No financial activity found.</p>
+                <p className="text-center text-muted-foreground py-8">{t.clientProfile.noFinancialActivity}</p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Event</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>{t.common.date}</TableHead>
+                      <TableHead>{t.clientProfile.event}</TableHead>
+                      <TableHead>{t.clientProfile.reference}</TableHead>
+                      <TableHead>{t.common.status}</TableHead>
+                      <TableHead className="text-right">{t.common.amount}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {profileData.timeline.map((item, index) => (
                       <TableRow key={`${item.type}-${item.orderId ?? "none"}-${item.commissionId ?? "none"}-${index}`}>
-                        <TableCell>{format(parseISO(item.occurredAt), 'MMM d, yyyy p')}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatDateTime(item.occurredAt, locale)}</TableCell>
                         <TableCell className="font-medium">{item.details}</TableCell>
-                        <TableCell>{item.orderName ?? (item.orderId ? `Order #${item.orderId}` : "-")}</TableCell>
+                        <TableCell dir="ltr" className={locale === "ar" ? "text-right" : "text-left"}>
+                            {item.orderName ?? (item.orderId ? `#${item.orderId}` : "-")}
+                        </TableCell>
                         <TableCell>
                           {item.commissionStatus ? (
                             <Badge variant={item.commissionStatus === "PAID" ? "default" : "secondary"} className={item.commissionStatus === "PAID" ? "bg-green-100 text-green-800" : ""}>
-                              {item.commissionStatus}
+                              {t.commissionStatus[item.commissionStatus as keyof typeof t.commissionStatus] ?? item.commissionStatus}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
-                          {item.amount == null ? "-" : `$${Number(item.amount).toFixed(2)}`}
+                        <TableCell className="text-right whitespace-nowrap">
+                          {item.amount == null ? "-" : formatCurrency(item.amount, locale)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -227,35 +232,35 @@ export default function ClientProfile() {
         <TabsContent value="orders">
           <Card>
             <CardHeader>
-              <CardTitle>Orders Directory</CardTitle>
-              <CardDescription>Summary of all past and processing orders for {client.name}</CardDescription>
+              <CardTitle>{t.clientProfile.ordersDirectory}</CardTitle>
+              <CardDescription>{t.clientProfile.ordersDirectoryDesc} {client.name}</CardDescription>
             </CardHeader>
             <CardContent>
               {orders?.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No orders found.</p>
+                <p className="text-center text-muted-foreground py-8">{t.orders.noOrders}</p>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                      <TableHead>VAT</TableHead>
-                      <TableHead>Receipt</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>{t.common.date}</TableHead>
+                      <TableHead>{t.common.description}</TableHead>
+                      <TableHead className="text-right">{t.common.amount}</TableHead>
+                      <TableHead>{t.wizard.vat}</TableHead>
+                      <TableHead>{t.clientProfile.receipt}</TableHead>
+                      <TableHead>{t.common.status}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {orders?.map(o => (
                       <TableRow key={o.id}>
-                        <TableCell>{format(parseISO(o.createdAt), 'MMM d, yyyy')}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatDate(o.createdAt, locale)}</TableCell>
                         <TableCell className="font-medium">{o.orderName}</TableCell>
-                        <TableCell className="text-right">${Number(o.amount).toFixed(2)}</TableCell>
-                        <TableCell>${Number(o.vatAmount).toFixed(2)}</TableCell>
-                        <TableCell>{o.receiptNumber || '-'}</TableCell>
+                        <TableCell className="text-right whitespace-nowrap">{formatCurrency(o.amount, locale)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{formatCurrency(o.vatAmount, locale)}</TableCell>
+                        <TableCell><span dir="ltr">{o.receiptNumber || '-'}</span></TableCell>
                         <TableCell>
-                          <Badge variant={o.status === "COMPLETED" ? "default" : "secondary"} className={o.status === "COMPLETED" ? "bg-green-100 text-green-800" : ""}>
-                            {o.status}
+                          <Badge variant={o.status === "COMPLETED" || o.status === "COLLECTED" ? "default" : "secondary"} className={o.status === "COMPLETED" || o.status === "COLLECTED" ? "bg-green-100 text-green-800" : ""}>
+                            {t.orderStatus[o.status as keyof typeof t.orderStatus] ?? o.status}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -270,29 +275,29 @@ export default function ClientProfile() {
         <TabsContent value="history">
           <Card>
             <CardHeader>
-              <CardTitle>Assignment History</CardTitle>
-              <CardDescription>View the transfer log of this client across sales agents.</CardDescription>
+              <CardTitle>{t.clientProfile.assignmentHistoryTitle}</CardTitle>
+              <CardDescription>{t.clientProfile.assignmentHistoryDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               {isAssignmentsLoading ? (
                 <Skeleton className="h-32 w-full" />
               ) : !assignments || assignments.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">No assignment history found.</p>
+                <p className="text-center text-muted-foreground py-8">{t.clientProfile.noAssignmentHistory}</p>
               ) : (
                 <div className="space-y-4">
                   {assignments.map(a => (
                     <div key={a.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                      <div className="bg-slate-100 p-2 rounded-full">
+                      <div className="bg-slate-100 p-2 rounded-full shrink-0">
                         <RefreshCw className="h-5 w-5 text-slate-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm text-slate-600 mb-1">{format(parseISO(a.createdAt), 'PPpp')}</p>
+                        <p className="text-sm text-slate-600 mb-1">{formatDateTime(a.createdAt, locale)}</p>
                         <p className="font-medium text-slate-800">
-                          {a.fromSalesName ? `Transferred from ${a.fromSalesName}` : 'Assigned initially'} 
-                          {' to '}
+                          {a.fromSalesName ? t.clientProfile.transferredFrom.replace("{from}", a.fromSalesName) : t.clientProfile.assignedInitiallyTo} 
+                          {' '}
                           <span className="text-primary">{a.toSalesName}</span>
                         </p>
-                        <p className="text-sm mt-1">Changed by: {a.changedByName}</p>
+                        <p className="text-sm mt-1">{t.clientProfile.changedBy}: {a.changedByName}</p>
                       </div>
                     </div>
                   ))}

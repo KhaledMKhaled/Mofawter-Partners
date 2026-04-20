@@ -14,6 +14,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { Users, Plus, Shield, Briefcase, UserSquare2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
+import { formatDateTime, formatDate } from "@/lib/format";
 
 import {
   Table,
@@ -59,6 +61,7 @@ const userSchema = z.object({
 });
 
 export default function AdminUsers() {
+  const { t, locale } = useI18n();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -88,14 +91,14 @@ export default function AdminUsers() {
       },
       {
         onSuccess: () => {
-          toast({ title: "Distributor created successfully" });
+          toast({ title: t.adminUsers.distributorCreated });
           queryClient.invalidateQueries({ queryKey: getListUsersQueryKey() });
           setIsDialogOpen(false);
           form.reset();
         },
         onError: (err: ApiError<{ error?: string }>) => {
           toast({
-            title: "Error creating distributor",
+            title: t.adminUsers.errorCreating,
             description: err?.data?.error || "Unknown error",
             variant: "destructive"
           });
@@ -142,37 +145,37 @@ export default function AdminUsers() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Users</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t.adminUsers.title}</h2>
           <p className="text-muted-foreground mt-1">
-            Manage company administrators, distributors, and sales agents.
+            {t.adminUsers.subtitle}
           </p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Distributor
+              <Plus className="me-2 h-4 w-4" />
+              {t.adminUsers.addDistributor}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Distributor</DialogTitle>
+              <DialogTitle>{t.adminUsers.createDistributorTitle}</DialogTitle>
               <DialogDescription>
-                Add a new distributor to the platform. Distributors can then log in and add their own sales agents.
+                {t.adminUsers.createDistributorDesc}
               </DialogDescription>
             </DialogHeader>
             
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4 text-start">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>{t.adminUsers.fullName}</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} />
+                        <Input placeholder={t.adminUsers.fullNamePlaceholder} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -184,9 +187,9 @@ export default function AdminUsers() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email Address</FormLabel>
+                      <FormLabel>{t.adminUsers.emailAddress}</FormLabel>
                       <FormControl>
-                        <Input type="email" placeholder="john@example.com" {...field} />
+                        <Input type="email" placeholder={t.adminUsers.emailPlaceholder} {...field} className={locale === "ar" ? "text-right" : ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -198,21 +201,21 @@ export default function AdminUsers() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Initial Password</FormLabel>
+                      <FormLabel>{t.adminUsers.initialPassword}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input type="password" placeholder={t.adminUsers.passwordPlaceholder} {...field} className={locale === "ar" ? "text-right" : ""} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="pt-4 flex justify-end">
-                  <Button type="button" variant="outline" className="mr-2" onClick={() => setIsDialogOpen(false)}>
-                    Cancel
+                <div className="pt-4 flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    {t.common.cancel}
                   </Button>
                   <Button type="submit" disabled={createUser.isPending}>
-                    {createUser.isPending ? "Creating..." : "Create Distributor"}
+                    {createUser.isPending ? t.adminUsers.creating : t.adminUsers.createBtn}
                   </Button>
                 </div>
               </form>
@@ -223,24 +226,24 @@ export default function AdminUsers() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
+          <CardTitle>{t.adminUsers.allUsers}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {!users || users.length === 0 ? (
             <Empty 
               icon={Users}
-              title="No users found"
-              description="Get started by creating a distributor."
+              title={t.adminUsers.noUsers}
+              description={t.adminUsers.noUsersDesc}
               className="py-12"
             />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Joined</TableHead>
+                  <TableHead>{t.adminUsers.userTable}</TableHead>
+                  <TableHead>{t.adminUsers.roleTable}</TableHead>
+                  <TableHead>{t.adminUsers.emailTable}</TableHead>
+                  <TableHead>{t.adminUsers.joinedTable}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -250,11 +253,11 @@ export default function AdminUsers() {
                     <TableCell>
                       <Badge variant="outline" className={`font-normal ${getRoleColor(user.role)}`}>
                         {getRoleIcon(user.role)}
-                        {user.role}
+                        {t.roles[user.role as keyof typeof t.roles] ?? user.role}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                    <TableCell>{format(parseISO(user.createdAt), 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{formatDate(user.createdAt, locale)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

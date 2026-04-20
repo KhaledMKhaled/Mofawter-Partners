@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin, Role } from "@workspace/api-client-react"
 import { ApiError } from "@workspace/api-client-react";
-import { Briefcase, ArrowRight, Loader2 } from "lucide-react";
+import { Briefcase, ArrowRight, Loader2, Languages } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,18 +19,20 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-
-const loginSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(1, { message: "Password is required." }),
-});
+import { useI18n } from "@/lib/i18n";
 
 export default function Login() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { t, locale, toggleLocale } = useI18n();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const loginMutation = useLogin();
+
+  const loginSchema = z.object({
+    email: z.string().email({ message: t.login.emailRequired }),
+    password: z.string().min(1, { message: t.login.passwordRequired }),
+  });
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -49,17 +51,17 @@ export default function Login() {
           localStorage.setItem("auth_token", data.token);
           
           toast({
-            title: "Welcome back",
-            description: `Logged in as ${data.user.name}`,
+            title: t.login.welcomeBack,
+            description: `${t.login.loggedInAs} ${data.user.name}`,
           });
 
-          // Redirect based on role
           if (data.user.role === Role.ADMIN) setLocation("/admin");
+          else if ((data.user.role as string) === "OPERATIONS") setLocation("/operations");
           else if (data.user.role === Role.DISTRIBUTOR) setLocation("/distributor");
           else setLocation("/sales");
         },
         onError: (error: ApiError<{ error?: string }>) => {
-          const msg = error?.data?.error || "Invalid credentials or server error.";
+          const msg = error?.data?.error || t.login.invalidCredentials;
           setErrorMsg(msg);
         },
       }
@@ -74,13 +76,26 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-md space-y-8">
+        {/* Language Toggle */}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleLocale}
+            className="gap-2"
+          >
+            <Languages className="h-4 w-4" />
+            {locale === "ar" ? "English" : "العربية"}
+          </Button>
+        </div>
+
         <div className="flex flex-col items-center space-y-2 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground mb-4 shadow-lg shadow-primary/20">
             <Briefcase className="h-6 w-6" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">MofawterPartners</h1>
+          <h1 className="text-3xl font-bold tracking-tight brand-name">{t.login.title}</h1>
           <p className="text-muted-foreground text-sm max-w-sm">
-            Sign in to manage sales, team performance, and commissions.
+            {t.login.subtitle}
           </p>
         </div>
 
@@ -98,11 +113,11 @@ export default function Login() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t.login.emailLabel}</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="name@example.com"
+                        placeholder={t.login.emailPlaceholder}
                         {...field}
                         className="h-11"
                         autoComplete="email"
@@ -118,11 +133,11 @@ export default function Login() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t.login.passwordLabel}</FormLabel>
                     <FormControl>
                       <Input
                         type="password"
-                        placeholder="••••••••"
+                        placeholder={t.login.passwordPlaceholder}
                         {...field}
                         className="h-11"
                         autoComplete="current-password"
@@ -140,13 +155,13 @@ export default function Login() {
               >
                 {loginMutation.isPending ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                    {t.login.signingIn}
                   </>
                 ) : (
                   <>
-                    Sign In
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    {t.login.signIn}
+                    <ArrowRight className="ms-2 h-4 w-4" />
                   </>
                 )}
               </Button>
@@ -160,44 +175,29 @@ export default function Login() {
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-muted/30 px-2 text-muted-foreground font-medium">Test Accounts</span>
+              <span className="bg-muted/30 px-2 text-muted-foreground font-medium">{t.login.testAccounts}</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-2 text-sm">
-            <button
-              type="button"
-              onClick={() => fillTestCredentials("admin@demo.test", "admin123")}
-              className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors text-left"
-            >
-              <div>
-                <div className="font-medium text-foreground">Admin</div>
-                <div className="text-muted-foreground text-xs">admin@demo.test / admin123</div>
-              </div>
-              <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Use</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillTestCredentials("distributor@demo.test", "distributor123")}
-              className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors text-left"
-            >
-              <div>
-                <div className="font-medium text-foreground">Distributor</div>
-                <div className="text-muted-foreground text-xs">distributor@demo.test / distributor123</div>
-              </div>
-              <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Use</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => fillTestCredentials("sales@demo.test", "sales123")}
-              className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors text-left"
-            >
-              <div>
-                <div className="font-medium text-foreground">Sales Rep</div>
-                <div className="text-muted-foreground text-xs">sales@demo.test / sales123</div>
-              </div>
-              <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">Use</div>
-            </button>
+            {[
+              { label: t.roles.ADMIN, email: "admin@demo.test", password: "admin123" },
+              { label: t.roles.DISTRIBUTOR, email: "distributor@demo.test", password: "distributor123" },
+              { label: t.roles.SALES, email: "sales@demo.test", password: "sales123" },
+            ].map((account) => (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => fillTestCredentials(account.email, account.password)}
+                className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/50 transition-colors"
+              >
+                <div className="text-start">
+                  <div className="font-medium text-foreground">{account.label}</div>
+                  <div className="text-muted-foreground text-xs font-mono" dir="ltr">{account.email} / {account.password}</div>
+                </div>
+                <div className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{t.common.use}</div>
+              </button>
+            ))}
           </div>
         </div>
       </div>

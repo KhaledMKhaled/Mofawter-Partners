@@ -10,6 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { DollarSign, CheckCircle2, Clock, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
+import { formatCurrency, formatDateTime, formatDate } from "@/lib/format";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -55,6 +57,7 @@ const fmt = (n: number) =>
   n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function AdminCommissions() {
+  const { t, locale } = useI18n();
   const { data: commissions, isLoading } = useListCommissions({
     query: { queryKey: getListCommissionsQueryKey() },
   });
@@ -167,8 +170,8 @@ export default function AdminCommissions() {
       {
         onSuccess: () => {
           toast({
-            title: ids.length === 1 ? "Commission marked as paid" : "Commissions marked as paid",
-            description: `${ids.length} commission${ids.length === 1 ? "" : "s"} updated.`,
+            title: ids.length === 1 ? t.adminCommissions.markPaidSuccessSingle : t.adminCommissions.markPaidSuccessMulti,
+            description: t.adminCommissions.markPaidSuccessDesc.replace("{count}", String(ids.length)),
           });
           setSelected(new Set());
           setConfirmOpen(false);
@@ -177,8 +180,8 @@ export default function AdminCommissions() {
         },
         onError: (err: ApiError<{ error?: string }>) => {
           toast({
-            title: "Error",
-            description: err?.data?.error || "Failed to update commissions",
+            title: t.adminCommissions.errorUpdateTitle,
+            description: err?.data?.error || t.adminCommissions.errorUpdateDesc,
             variant: "destructive",
           });
         },
@@ -212,9 +215,9 @@ export default function AdminCommissions() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Commissions</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t.adminCommissions.title}</h2>
         <p className="text-muted-foreground mt-1">
-          View all commissions generated from completed orders.
+          {t.adminCommissions.subtitle}
         </p>
       </div>
 
@@ -225,8 +228,8 @@ export default function AdminCommissions() {
               <Clock className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Outstanding (Unpaid)</p>
-              <h3 className="text-2xl font-bold text-amber-700">${fmt(totals.unpaid)}</h3>
+              <p className="text-sm font-medium text-muted-foreground">{t.adminCommissions.outstanding}</p>
+              <h3 className="text-2xl font-bold text-amber-700 dir-ltr" dir="ltr">{formatCurrency(totals.unpaid, locale)}</h3>
             </div>
           </CardContent>
         </Card>
@@ -236,8 +239,8 @@ export default function AdminCommissions() {
               <CheckCircle2 className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Paid Out</p>
-              <h3 className="text-2xl font-bold text-green-700">${fmt(totals.paid)}</h3>
+              <p className="text-sm font-medium text-muted-foreground">{t.adminCommissions.paidOut}</p>
+              <h3 className="text-2xl font-bold text-green-700 dir-ltr" dir="ltr">{formatCurrency(totals.paid, locale)}</h3>
             </div>
           </CardContent>
         </Card>
@@ -246,9 +249,9 @@ export default function AdminCommissions() {
       <Card>
         <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Commission Ledger</CardTitle>
+            <CardTitle>{t.adminCommissions.ledgerTitle}</CardTitle>
             <CardDescription>
-              Record of all commission payouts across the company.
+              {t.adminCommissions.ledgerDesc}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -259,8 +262,8 @@ export default function AdminCommissions() {
               disabled={filtered.length === 0}
               data-testid="button-export-csv"
             >
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
+              <Download className="me-2 h-4 w-4" />
+              {t.adminCommissions.exportCsv}
             </Button>
             {selectedUnpaid.length > 0 && (
               <Button
@@ -268,7 +271,7 @@ export default function AdminCommissions() {
                 onClick={() => setConfirmOpen(true)}
                 disabled={markPaid.isPending}
               >
-                Mark {selectedUnpaid.length} as Paid
+                {t.adminCommissions.markAsPaidBtn.replace("{count}", String(selectedUnpaid.length))}
               </Button>
             )}
           </div>
@@ -277,7 +280,7 @@ export default function AdminCommissions() {
           <div className="flex flex-wrap items-end gap-3 px-6 pb-4 border-b">
             <div className="flex flex-col gap-1">
               <Label htmlFor="filter-status" className="text-xs">
-                Status
+                {t.adminCommissions.statusFilterLabel}
               </Label>
               <Select
                 value={statusFilter}
@@ -291,15 +294,15 @@ export default function AdminCommissions() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">All statuses</SelectItem>
-                  <SelectItem value="UNPAID">Unpaid</SelectItem>
-                  <SelectItem value="PAID">Paid</SelectItem>
+                  <SelectItem value="ALL">{t.adminCommissions.allStatuses}</SelectItem>
+                  <SelectItem value="UNPAID">{t.adminCommissions.unpaid}</SelectItem>
+                  <SelectItem value="PAID">{t.adminCommissions.paid}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="filter-from" className="text-xs">
-                From
+                {t.adminCommissions.from}
               </Label>
               <Input
                 id="filter-from"
@@ -312,7 +315,7 @@ export default function AdminCommissions() {
             </div>
             <div className="flex flex-col gap-1">
               <Label htmlFor="filter-to" className="text-xs">
-                To
+                {t.adminCommissions.to}
               </Label>
               <Input
                 id="filter-to"
@@ -334,18 +337,18 @@ export default function AdminCommissions() {
                 }}
                 data-testid="button-clear-filters"
               >
-                Clear
+                {t.adminCommissions.clearFilters}
               </Button>
             )}
-            <div className="ml-auto text-sm text-muted-foreground">
-              {filtered.length} of {commissions?.length ?? 0} commissions
+            <div className="ms-auto text-sm text-muted-foreground">
+              {t.adminCommissions.showingCount.replace("{filtered}", String(filtered.length)).replace("{total}", String(commissions?.length ?? 0))}
             </div>
           </div>
           {!commissions || commissions.length === 0 ? (
             <Empty
               icon={DollarSign}
-              title="No commissions yet"
-              description="Commissions will appear here once orders are marked as completed."
+              title={t.adminCommissions.noCommissions}
+              description={t.adminCommissions.noCommissionsDesc}
               className="py-12"
             />
           ) : (
@@ -357,24 +360,24 @@ export default function AdminCommissions() {
                       checked={allUnpaidSelected}
                       disabled={unpaidIds.length === 0}
                       onCheckedChange={(v) => toggleAll(Boolean(v))}
-                      aria-label="Select all unpaid"
+                      aria-label={t.adminCommissions.selectAllUnpaid}
                     />
                   </TableHead>
-                  <TableHead>Earner</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Source Order</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
+                  <TableHead>{t.adminCommissions.earnerTable}</TableHead>
+                  <TableHead>{t.adminCommissions.roleTable}</TableHead>
+                  <TableHead>{t.adminCommissions.sourceOrderTable}</TableHead>
+                  <TableHead>{t.adminCommissions.clientTable}</TableHead>
+                  <TableHead>{t.adminCommissions.dateTable}</TableHead>
+                  <TableHead className="text-right">{t.adminCommissions.amountTable}</TableHead>
+                  <TableHead>{t.adminCommissions.statusTable}</TableHead>
+                  <TableHead className="text-right">{t.adminCommissions.actionTable}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
-                      No commissions match the current filters.
+                      {t.adminCommissions.noMatch}
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -394,52 +397,45 @@ export default function AdminCommissions() {
                         ) : null}
                       </TableCell>
                       <TableCell className="font-medium">
-                        {commission.userName || "Unknown User"}
+                        {commission.userName || t.adminCommissions.unknownUser}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className="text-xs font-normal">
-                          {commission.roleType}
+                          {t.roles[commission.roleType as keyof typeof t.roles] ?? commission.roleType}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="font-medium text-foreground">
-                          {commission.orderName || "Unknown Order"}
+                          {commission.orderName || t.adminCommissions.unknownOrder}
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-xs text-muted-foreground" dir="ltr">
                           Order #{commission.orderId}
                         </div>
                       </TableCell>
-                      <TableCell>{commission.clientName || "Unknown Client"}</TableCell>
-                      <TableCell>
-                        {format(parseISO(commission.createdAt), "MMM d, yyyy")}
+                      <TableCell>{commission.clientName || t.adminCommissions.unknownClient}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatDate(commission.createdAt, locale)}
                       </TableCell>
-                      <TableCell className="text-right font-bold text-green-600">
-                        +${fmt(commission.amount)}
+                      <TableCell className="text-right font-bold text-emerald-600 whitespace-nowrap" dir="ltr">
+                        +{formatCurrency(commission.amount, locale)}
                       </TableCell>
                       <TableCell>
                         {commission.status === "PAID" ? (
                           <div className="flex flex-col gap-1">
                             <Badge
                               variant="outline"
-                              className="bg-green-50 text-green-700 border-green-200 w-fit"
+                              className="bg-emerald-50 text-emerald-700 border-emerald-200 w-fit"
                             >
-                              <CheckCircle2 className="mr-1 h-3 w-3" />
-                              Paid
+                              <CheckCircle2 className="me-1 h-3 w-3" />
+                              {t.adminCommissions.paid}
                             </Badge>
                             <div
                               className="text-xs text-muted-foreground"
                               data-testid={`text-paid-info-${commission.id}`}
                             >
-                              {commission.paidAt ? (
-                                <>
-                                  Paid on{" "}
-                                  {format(parseISO(commission.paidAt), "MMM d, yyyy")}
-                                </>
-                              ) : (
-                                "Paid (date unavailable)"
-                              )}
+                              {commission.paidAt ? t.adminCommissions.paidOn.replace("{date}", formatDate(commission.paidAt, locale)) : t.adminCommissions.paidDateUnavailable}
                               {commission.paidByName
-                                ? ` by ${commission.paidByName}`
+                                ? t.adminCommissions.paidBy.replace("{name}", commission.paidByName)
                                 : ""}
                             </div>
                           </div>
@@ -448,8 +444,8 @@ export default function AdminCommissions() {
                             variant="outline"
                             className="bg-amber-50 text-amber-700 border-amber-200"
                           >
-                            <Clock className="mr-1 h-3 w-3" />
-                            Unpaid
+                            <Clock className="me-1 h-3 w-3" />
+                            {t.adminCommissions.unpaid}
                           </Badge>
                         )}
                       </TableCell>
@@ -461,7 +457,7 @@ export default function AdminCommissions() {
                             onClick={() => handleMarkPaid([commission.id])}
                             disabled={markPaid.isPending}
                           >
-                            Mark Paid
+                            {t.adminCommissions.markPaidAction}
                           </Button>
                         )}
                       </TableCell>
@@ -480,20 +476,18 @@ export default function AdminCommissions() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Mark commissions as paid?</AlertDialogTitle>
+            <AlertDialogTitle>{t.adminCommissions.confirmTitle}</AlertDialogTitle>
             <AlertDialogDescription>
-              You are about to mark {selectedUnpaid.length} commission
-              {selectedUnpaid.length === 1 ? "" : "s"} as paid. Once marked
-              paid, the source order can no longer be reverted to pending.
+              {t.adminCommissions.confirmDesc.replace("{count}", String(selectedUnpaid.length))}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => handleMarkPaid(selectedUnpaid)}
               disabled={markPaid.isPending}
             >
-              {markPaid.isPending ? "Updating..." : "Confirm"}
+              {markPaid.isPending ? t.adminCommissions.updating : t.common.confirm}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

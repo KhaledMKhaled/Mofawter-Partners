@@ -4,3 +4,6 @@ export * from "./orders";
 export * from "./commissions";
 export * from "./settings";
 export * from "./packages";
+export * from "./commission-rules";
+export * from "./payment-batches";
+export * from "./audit-logs";

@@ -5,10 +5,11 @@
  * Sales & Distributor Commission Management API
  * OpenAPI spec version: 0.1.0
  */
+import type { TaxCardNumber } from "./taxCardNumber";
 
 export interface UpdateClientRequest {
   name?: string;
-  taxCardNumber?: string;
+  taxCardNumber?: TaxCardNumber;
   taxCardName?: string;
   issuingAuthority?: string;
   commercialRegistryNumber?: string;

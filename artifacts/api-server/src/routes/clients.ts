@@ -10,17 +10,13 @@ import {
 import { aliasedTable } from "drizzle-orm";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
+import { normalizeTaxCardNumber } from "../lib/tax-card";
 
 const router: IRouter = Router();
 router.use(requireAuth);
 
 const TAX_CARD_DIGITS_ONLY_REGEX = /^\d+$/;
 const TAX_CARD_DIGITS_ONLY_ERROR = "taxCardNumber must contain digits only";
-
-function normalizeTaxCardNumber(value: unknown): string {
-  if (typeof value !== "string") return "";
-  return value.trim().replace(/\s+/g, "");
-}
 
 function isValidTaxCardNumber(value: string): boolean {
   return TAX_CARD_DIGITS_ONLY_REGEX.test(value);
@@ -388,6 +384,19 @@ router.patch("/:id", async (req, res, next) => {
     delete updates.ownershipEndDate;
     delete updates.id;
     delete updates.createdAt;
+
+    if ("taxCardNumber" in updates) {
+      const normalizedTaxCardNumber = normalizeTaxCardNumber(updates.taxCardNumber);
+      if (!normalizedTaxCardNumber) {
+        res.status(400).json({ error: "taxCardNumber cannot be empty" });
+        return;
+      }
+      if (!isValidTaxCardNumber(normalizedTaxCardNumber)) {
+        res.status(400).json({ error: TAX_CARD_DIGITS_ONLY_ERROR });
+        return;
+      }
+      updates.taxCardNumber = normalizedTaxCardNumber;
+    }
 
     try {
       const [updated] = await db

@@ -11,6 +11,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { getCommissionRates } from "../lib/commission";
 import { planCommissionUpdate } from "../lib/ownership";
+import { normalizeTaxCardNumber } from "../lib/tax-card";
 
 const router: IRouter = Router();
 router.use(requireAuth);
@@ -277,12 +278,13 @@ router.post("/unified", async (req, res, next) => {
   try {
     const { role, sub } = req.auth!;
     const {
-      taxCardNumber,
+      taxCardNumber: rawTaxCardNumber,
       client,
       packageId,
       receiptNumber,
       isFullyCollected,
     } = req.body ?? {};
+    const taxCardNumber = normalizeTaxCardNumber(rawTaxCardNumber);
 
     if (!taxCardNumber || !packageId || isFullyCollected === undefined) {
       res.status(400).json({ error: "Missing required fields" });
@@ -293,7 +295,7 @@ router.post("/unified", async (req, res, next) => {
       let [existingClient] = await tx
         .select()
         .from(clientsTable)
-        .where(eq(clientsTable.taxCardNumber, String(taxCardNumber)));
+        .where(eq(clientsTable.taxCardNumber, taxCardNumber));
 
       if (!existingClient) {
         if (!client) {
@@ -365,7 +367,7 @@ router.post("/unified", async (req, res, next) => {
           .insert(clientsTable)
           .values({
             name,
-            taxCardNumber: String(taxCardNumber),
+            taxCardNumber,
             taxCardName,
             issuingAuthority,
             commercialRegistryNumber,

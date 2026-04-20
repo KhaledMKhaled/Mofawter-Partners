@@ -47,13 +47,24 @@ router.get("/summary", async (req, res) => {
     orders = all.filter((o) => clientIds.includes(o.clientId));
   }
 
-  // Commissions
+  // Commissions — distributors see their own AND their team's, matching /api/commissions.
   let commissions: (typeof commissionsTable.$inferSelect)[] = [];
   if (role === "ADMIN") {
     commissions = await db
       .select()
       .from(commissionsTable)
       .orderBy(desc(commissionsTable.createdAt));
+  } else if (role === "DISTRIBUTOR") {
+    const team = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.distributorId, sub));
+    const allowedUserIds = new Set<number>([sub, ...team.map((u) => u.id)]);
+    const all = await db
+      .select()
+      .from(commissionsTable)
+      .orderBy(desc(commissionsTable.createdAt));
+    commissions = all.filter((c) => allowedUserIds.has(c.userId));
   } else {
     commissions = await db
       .select()

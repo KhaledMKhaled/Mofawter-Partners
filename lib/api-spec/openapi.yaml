@@ -128,6 +128,70 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Client" }
 
+  /clients/{id}/assignment:
+    patch:
+      operationId: reassignClient
+      tags: [clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReassignClientRequest" }
+      responses:
+        "200":
+          description: Client reassigned
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /clients/{id}/assignments:
+    get:
+      operationId: listClientAssignments
+      tags: [clients]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Assignment history for client
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ClientAssignment" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
   /orders:
     get:
       operationId: listOrders
@@ -342,6 +406,30 @@ components:
         assignedDistributorId: { type: integer }
         ownershipStartDate: { type: string, format: date-time }
         ownershipEndDate: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    ReassignClientRequest:
+      type: object
+      required: [assignedSalesId]
+      properties:
+        assignedSalesId: { type: integer }
+
+    ClientAssignment:
+      type: object
+      required: [id, clientId, toSalesId, toDistributorId, changedById, createdAt]
+      properties:
+        id: { type: integer }
+        clientId: { type: integer }
+        fromSalesId: { type: ["integer", "null"] }
+        fromSalesName: { type: ["string", "null"] }
+        fromDistributorId: { type: ["integer", "null"] }
+        fromDistributorName: { type: ["string", "null"] }
+        toSalesId: { type: integer }
+        toSalesName: { type: ["string", "null"] }
+        toDistributorId: { type: integer }
+        toDistributorName: { type: ["string", "null"] }
+        changedById: { type: integer }
+        changedByName: { type: ["string", "null"] }
         createdAt: { type: string, format: date-time }
 
     CreateClientRequest:

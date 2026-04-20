@@ -19,6 +19,7 @@ import type {
 import type {
   AuthSession,
   Client,
+  ClientAssignment,
   Commission,
   CommissionRates,
   CreateClientRequest,
@@ -31,6 +32,7 @@ import type {
   LoginRequest,
   MarkCommissionsPaidRequest,
   Order,
+  ReassignClientRequest,
   UpdateCommissionStatusRequest,
   UpdateOrderStatusRequest,
   User,
@@ -568,6 +570,168 @@ export const useCreateClient = <
 > => {
   return useMutation(getCreateClientMutationOptions(options));
 };
+
+export const getReassignClientUrl = (id: number) => {
+  return `/api/clients/${id}/assignment`;
+};
+
+export const reassignClient = async (
+  id: number,
+  reassignClientRequest: ReassignClientRequest,
+  options?: RequestInit,
+): Promise<Client> => {
+  return customFetch<Client>(getReassignClientUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reassignClientRequest),
+  });
+};
+
+export const getReassignClientMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reassignClient>>,
+    TError,
+    { id: number; data: BodyType<ReassignClientRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reassignClient>>,
+  TError,
+  { id: number; data: BodyType<ReassignClientRequest> },
+  TContext
+> => {
+  const mutationKey = ["reassignClient"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reassignClient>>,
+    { id: number; data: BodyType<ReassignClientRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return reassignClient(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReassignClientMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reassignClient>>
+>;
+export type ReassignClientMutationBody = BodyType<ReassignClientRequest>;
+export type ReassignClientMutationError = ErrorType<ErrorResponse>;
+
+export const useReassignClient = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reassignClient>>,
+    TError,
+    { id: number; data: BodyType<ReassignClientRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reassignClient>>,
+  TError,
+  { id: number; data: BodyType<ReassignClientRequest> },
+  TContext
+> => {
+  return useMutation(getReassignClientMutationOptions(options));
+};
+
+export const getListClientAssignmentsUrl = (id: number) => {
+  return `/api/clients/${id}/assignments`;
+};
+
+export const listClientAssignments = async (
+  id: number,
+  options?: RequestInit,
+): Promise<ClientAssignment[]> => {
+  return customFetch<ClientAssignment[]>(getListClientAssignmentsUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListClientAssignmentsQueryKey = (id: number) => {
+  return [`/api/clients/${id}/assignments`] as const;
+};
+
+export const getListClientAssignmentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientAssignments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientAssignments>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientAssignmentsQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientAssignments>>
+  > = ({ signal }) => listClientAssignments(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientAssignments>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientAssignmentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientAssignments>>
+>;
+export type ListClientAssignmentsQueryError = ErrorType<ErrorResponse>;
+
+export function useListClientAssignments<
+  TData = Awaited<ReturnType<typeof listClientAssignments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientAssignments>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientAssignmentsQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 export const getListOrdersUrl = () => {
   return `/api/orders`;

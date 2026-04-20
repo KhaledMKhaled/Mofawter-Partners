@@ -8,6 +8,7 @@
 
 export * from "./authSession";
 export * from "./client";
+export * from "./clientAssignment";
 export * from "./commission";
 export * from "./commissionRates";
 export * from "./commissionRoleType";
@@ -25,6 +26,7 @@ export * from "./loginRequest";
 export * from "./markCommissionsPaidRequest";
 export * from "./order";
 export * from "./orderStatus";
+export * from "./reassignClientRequest";
 export * from "./role";
 export * from "./updateCommissionStatusRequest";
 export * from "./updateOrderStatusRequest";

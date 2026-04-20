@@ -45,6 +45,7 @@ export default function Layout({ children, user }: LayoutProps) {
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
     { title: "Users", url: "/admin/users", icon: Users },
+    { title: "Clients", url: "/admin/clients", icon: UserSquare2 },
     { title: "Commissions", url: "/admin/commissions", icon: DollarSign },
     { title: "Settings", url: "/admin/settings", icon: Settings },
   ];

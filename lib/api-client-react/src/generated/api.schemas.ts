@@ -60,6 +60,33 @@ export interface Client {
   createdAt: string;
 }
 
+export interface ReassignClientRequest {
+  assignedSalesId: number;
+}
+
+export interface ClientAssignment {
+  id: number;
+  clientId: number;
+  /** @nullable */
+  fromSalesId?: number | null;
+  /** @nullable */
+  fromSalesName?: string | null;
+  /** @nullable */
+  fromDistributorId?: number | null;
+  /** @nullable */
+  fromDistributorName?: string | null;
+  toSalesId: number;
+  /** @nullable */
+  toSalesName?: string | null;
+  toDistributorId: number;
+  /** @nullable */
+  toDistributorName?: string | null;
+  changedById: number;
+  /** @nullable */
+  changedByName?: string | null;
+  createdAt: string;
+}
+
 export interface CreateClientRequest {
   name: string;
   /** @nullable */

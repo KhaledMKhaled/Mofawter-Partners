@@ -79,6 +79,47 @@ export const CreateClientBody = zod.object({
   assignedSalesId: zod.number().nullish(),
 });
 
+export const ReassignClientParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ReassignClientBody = zod.object({
+  assignedSalesId: zod.number(),
+});
+
+export const ReassignClientResponse = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  assignedSalesId: zod.number(),
+  assignedDistributorId: zod.number(),
+  ownershipStartDate: zod.coerce.date(),
+  ownershipEndDate: zod.coerce.date(),
+  createdAt: zod.coerce.date(),
+});
+
+export const ListClientAssignmentsParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListClientAssignmentsResponseItem = zod.object({
+  id: zod.number(),
+  clientId: zod.number(),
+  fromSalesId: zod.number().nullish(),
+  fromSalesName: zod.string().nullish(),
+  fromDistributorId: zod.number().nullish(),
+  fromDistributorName: zod.string().nullish(),
+  toSalesId: zod.number(),
+  toSalesName: zod.string().nullish(),
+  toDistributorId: zod.number(),
+  toDistributorName: zod.string().nullish(),
+  changedById: zod.number(),
+  changedByName: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListClientAssignmentsResponse = zod.array(
+  ListClientAssignmentsResponseItem,
+);
+
 export const ListOrdersResponseItem = zod.object({
   id: zod.number(),
   clientId: zod.number(),

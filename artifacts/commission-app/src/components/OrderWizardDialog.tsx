@@ -42,9 +42,15 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 
+const TAX_CARD_DIGITS_ONLY_REGEX = /^\d+$/;
+const TAX_CARD_DIGITS_ONLY_MESSAGE = "رقم البطاقة الضريبية يجب أن يحتوي على أرقام فقط";
+
 const clientInfoSchema = z.object({
   name: z.string().min(2, "Client Name is required"),
-  taxCardNumber: z.string().min(2, "Tax Card requires a value"),
+  taxCardNumber: z
+    .string()
+    .min(1, "رقم البطاقة الضريبية مطلوب")
+    .regex(TAX_CARD_DIGITS_ONLY_REGEX, TAX_CARD_DIGITS_ONLY_MESSAGE),
   taxCardName: z.string().min(2, "Tax Card Name is required"),
   issuingAuthority: z.string().min(2, "Issuing Authority is required"),
   commercialRegistryNumber: z.string().min(2, "Commercial Registry Number is required"),
@@ -188,7 +194,7 @@ main
   const isPendingOrderBlocked = !!lookupData?.found && !!lookupData?.hasPendingOrder;
 
   const triggerLookup = (value: string) => {
-    const normalizedValue = value.trim();
+    const normalizedValue = value.trim().replace(/\s+/g, "");
     clientForm.setValue("taxCardNumber", normalizedValue, { shouldValidate: true });
     if (normalizedValue.length >= 5) {
       setTaxCardSearch(normalizedValue);
@@ -269,11 +275,28 @@ main
                     <FormLabel>Tax Card Number</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter 123-456-789"
+                        placeholder="أدخل رقم البطاقة الضريبية"
+                        inputMode="numeric"
+                        pattern="\d*"
                         {...field}
                         onChange={(e) => {
-                          field.onChange(e);
-                          triggerLookup(e.target.value);
+                          const digitsOnlyValue = e.target.value.replace(/\D+/g, "");
+                          field.onChange(digitsOnlyValue);
+                          triggerLookup(digitsOnlyValue);
+                        }}
+                        onKeyDown={(e) => {
+                          if (["e", "E", "+", "-", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onPaste={(e) => {
+                          const pastedText = e.clipboardData.getData("text");
+                          if (/\D/.test(pastedText)) {
+                            e.preventDefault();
+                            const digitsOnlyValue = pastedText.replace(/\D+/g, "");
+                            field.onChange(digitsOnlyValue);
+                            triggerLookup(digitsOnlyValue);
+                          }
                         }}
                         onBlur={(e) => {
                           field.onBlur();

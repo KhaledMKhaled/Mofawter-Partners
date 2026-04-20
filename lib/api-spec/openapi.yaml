@@ -137,7 +137,7 @@ paths:
         - name: taxCardNumber
           in: query
           required: true
-          schema: { type: string }
+          schema: { $ref: "#/components/schemas/TaxCardNumber" }
       responses:
         "200":
           description: Client lookup result
@@ -538,6 +538,11 @@ components:
         role: { $ref: "#/components/schemas/Role" }
         distributorId: { type: ["integer", "null"] }
 
+    TaxCardNumber:
+      type: string
+      pattern: "^\\d+$"
+      description: Tax card number must contain digits only.
+
     Client:
       type: object
       required: [
@@ -549,7 +554,7 @@ components:
       properties:
         id: { type: integer }
         name: { type: string }
-        taxCardNumber: { type: string }
+        taxCardNumber: { $ref: "#/components/schemas/TaxCardNumber" }
         taxCardName: { type: string }
         issuingAuthority: { type: string }
         commercialRegistryNumber: { type: string }
@@ -571,7 +576,7 @@ components:
       type: object
       properties:
         name: { type: string }
-        taxCardNumber: { type: string }
+        taxCardNumber: { $ref: "#/components/schemas/TaxCardNumber" }
         taxCardName: { type: string }
         issuingAuthority: { type: string }
         commercialRegistryNumber: { type: string }
@@ -593,7 +598,7 @@ components:
       ]
       properties:
         name: { type: string }
-        taxCardNumber: { type: string }
+        taxCardNumber: { $ref: "#/components/schemas/TaxCardNumber" }
         taxCardName: { type: string }
         issuingAuthority: { type: string }
         commercialRegistryNumber: { type: string }
@@ -714,7 +719,7 @@ components:
       type: object
       required: [taxCardNumber, packageId, isFullyCollected]
       properties:
-        taxCardNumber: { type: string }
+        taxCardNumber: { $ref: "#/components/schemas/TaxCardNumber" }
         client: { $ref: "#/components/schemas/CreateClientRequest" }
         packageId: { type: integer }
         receiptNumber: { type: ["string", "null"] }

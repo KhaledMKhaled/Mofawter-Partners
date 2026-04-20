@@ -1,36 +1,378 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Sales & Distributor Commission Management API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: auth
+  - name: users
+  - name: clients
+  - name: orders
+  - name: commissions
+  - name: dashboard
+  - name: settings
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
           content:
             application/json:
+              schema: { $ref: "#/components/schemas/HealthStatus" }
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Unauthenticated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      parameters:
+        - name: role
+          in: query
+          required: false
+          schema: { type: string, enum: [ADMIN, DISTRIBUTOR, SALES] }
+        - name: distributorId
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Users
+          content:
+            application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+    post:
+      operationId: createUser
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      responses:
+        "200":
+          description: Clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Client" }
+    post:
+      operationId: createClient
+      tags: [clients]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateClientRequest" }
+      responses:
+        "201":
+          description: Client created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Client" }
+
+  /orders:
+    get:
+      operationId: listOrders
+      tags: [orders]
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Order" }
+    post:
+      operationId: createOrder
+      tags: [orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateOrderRequest" }
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /orders/{id}/status:
+    patch:
+      operationId: updateOrderStatus
+      tags: [orders]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateOrderStatusRequest" }
+      responses:
+        "200":
+          description: Order updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Order" }
+
+  /commissions:
+    get:
+      operationId: listCommissions
+      tags: [commissions]
+      responses:
+        "200":
+          description: Commissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Commission" }
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      responses:
+        "200":
+          description: Summary for current user role
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DashboardSummary" }
+
+  /settings/commission-rates:
+    get:
+      operationId: getCommissionRates
+      tags: [settings]
+      responses:
+        "200":
+          description: Current commission rates
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CommissionRates" }
+    put:
+      operationId: updateCommissionRates
+      tags: [settings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CommissionRates" }
+      responses:
+        "200":
+          description: Updated rates
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CommissionRates" }
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
+        status: { type: string }
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
+    Role:
+      type: string
+      enum: [ADMIN, DISTRIBUTOR, SALES]
+
+    User:
+      type: object
+      required: [id, name, email, role, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        email: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        distributorId: { type: ["integer", "null"] }
+        createdAt: { type: string, format: date-time }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string }
+        password: { type: string }
+
+    AuthSession:
+      type: object
+      required: [token, user]
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+
+    CreateUserRequest:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name: { type: string }
+        email: { type: string }
+        password: { type: string }
+        role: { $ref: "#/components/schemas/Role" }
+        distributorId: { type: ["integer", "null"] }
+
+    Client:
+      type: object
+      required: [id, name, assignedSalesId, assignedDistributorId, ownershipStartDate, ownershipEndDate, createdAt]
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        assignedSalesId: { type: integer }
+        assignedDistributorId: { type: integer }
+        ownershipStartDate: { type: string, format: date-time }
+        ownershipEndDate: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    CreateClientRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        assignedSalesId: { type: ["integer", "null"] }
+
+    OrderStatus:
+      type: string
+      enum: [PENDING, COMPLETED]
+
+    Order:
+      type: object
+      required: [id, clientId, orderName, amount, orderDate, status, createdAt]
+      properties:
+        id: { type: integer }
+        clientId: { type: integer }
+        clientName: { type: ["string", "null"] }
+        salesId: { type: ["integer", "null"] }
+        salesName: { type: ["string", "null"] }
+        distributorId: { type: ["integer", "null"] }
+        distributorName: { type: ["string", "null"] }
+        orderName: { type: string }
+        amount: { type: number }
+        orderDate: { type: string, format: date-time }
+        status: { $ref: "#/components/schemas/OrderStatus" }
+        createdAt: { type: string, format: date-time }
+
+    CreateOrderRequest:
+      type: object
+      required: [clientId, orderName, amount]
+      properties:
+        clientId: { type: integer }
+        orderName: { type: string }
+        amount: { type: number }
+
+    UpdateOrderStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status: { $ref: "#/components/schemas/OrderStatus" }
+
+    Commission:
+      type: object
+      required: [id, orderId, userId, amount, roleType, status, createdAt]
+      properties:
+        id: { type: integer }
+        orderId: { type: integer }
+        orderName: { type: ["string", "null"] }
+        clientName: { type: ["string", "null"] }
+        userId: { type: integer }
+        userName: { type: ["string", "null"] }
+        amount: { type: number }
+        roleType:
+          type: string
+          enum: [DISTRIBUTOR, SALES]
         status:
           type: string
-      required:
-        - status
+          enum: [UNPAID, PAID]
+        createdAt: { type: string, format: date-time }
 
+    DashboardSummary:
+      type: object
+      required: [role, totalOrders, completedOrders, pendingOrders, totalSales, totalCommissions, recentOrders, recentCommissions]
+      properties:
+        role: { $ref: "#/components/schemas/Role" }
+        totalOrders: { type: integer }
+        completedOrders: { type: integer }
+        pendingOrders: { type: integer }
+        totalSales: { type: number }
+        totalCommissions: { type: number }
+        teamSize: { type: ["integer", "null"] }
+        clientCount: { type: ["integer", "null"] }
+        recentOrders:
+          type: array
+          items: { $ref: "#/components/schemas/Order" }
+        recentCommissions:
+          type: array
+          items: { $ref: "#/components/schemas/Commission" }
+
+    CommissionRates:
+      type: object
+      required: [salesPct, distributorPct]
+      properties:
+        salesPct: { type: number }
+        distributorPct: { type: number }

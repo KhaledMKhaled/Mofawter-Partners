@@ -40,28 +40,49 @@ export default function DistributorCommissions() {
     );
   }
 
-  const totalEarned = commissions?.reduce((sum, c) => sum + c.amount, 0) || 0;
+  const totals = (commissions ?? []).reduce(
+    (acc, c) => {
+      acc.total += c.amount;
+      if (c.status === "PAID") acc.paid += c.amount;
+      else acc.unpaid += c.amount;
+      return acc;
+    },
+    { total: 0, paid: 0, unpaid: 0 },
+  );
+  const fmt = (n: number) =>
+    n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Commissions</h2>
-          <p className="text-muted-foreground mt-1">
-            Your earnings from team sales.
-          </p>
-        </div>
-        <Card className="w-full sm:w-auto bg-muted/50">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Commissions</h2>
+        <p className="text-muted-foreground mt-1">
+          Your earnings from team sales.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card className="bg-muted/50">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-full text-primary">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Total Earned</p>
-              <h3 className="text-2xl font-bold text-green-600">
-                ${totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
+              <h3 className="text-2xl font-bold text-green-600">${fmt(totals.total)}</h3>
             </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium text-muted-foreground">Paid</p>
+            <h3 className="text-2xl font-bold text-green-700">${fmt(totals.paid)}</h3>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-medium text-muted-foreground">Unpaid</p>
+            <h3 className="text-2xl font-bold text-amber-700">${fmt(totals.unpaid)}</h3>
           </CardContent>
         </Card>
       </div>

@@ -45,6 +45,7 @@ export default function Layout({ children, user }: LayoutProps) {
     { title: "Dashboard", url: "/admin", icon: LayoutDashboard },
     { title: "Orders", url: "/admin/orders", icon: ShoppingCart },
     { title: "Users", url: "/admin/users", icon: Users },
+    { title: "Clients", url: "/admin/clients", icon: UserSquare2 },
     { title: "Commissions", url: "/admin/commissions", icon: DollarSign },
     { title: "Settings", url: "/admin/settings", icon: Settings },
   ];
@@ -78,7 +79,7 @@ export default function Layout({ children, user }: LayoutProps) {
               <Briefcase className="h-4 w-4" />
             </div>
             <div className="flex flex-col">
-              <span className="font-semibold leading-none tracking-tight">CommissionHQ</span>
+              <span className="font-semibold leading-none tracking-tight">MofawterPartners</span>
             </div>
           </SidebarHeader>
           <SidebarContent>

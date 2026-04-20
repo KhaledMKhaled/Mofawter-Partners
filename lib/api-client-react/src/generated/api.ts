@@ -19,6 +19,7 @@ import type {
 import type {
   AuthSession,
   Client,
+  ClientAssignment,
   Commission,
   CommissionRates,
   CreateClientRequest,
@@ -29,7 +30,10 @@ import type {
   HealthStatus,
   ListUsersParams,
   LoginRequest,
+  MarkCommissionsPaidRequest,
   Order,
+  ReassignClientRequest,
+  UpdateCommissionStatusRequest,
   UpdateOrderStatusRequest,
   User,
 } from "./api.schemas";
@@ -567,6 +571,168 @@ export const useCreateClient = <
   return useMutation(getCreateClientMutationOptions(options));
 };
 
+export const getReassignClientUrl = (id: number) => {
+  return `/api/clients/${id}/assignment`;
+};
+
+export const reassignClient = async (
+  id: number,
+  reassignClientRequest: ReassignClientRequest,
+  options?: RequestInit,
+): Promise<Client> => {
+  return customFetch<Client>(getReassignClientUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(reassignClientRequest),
+  });
+};
+
+export const getReassignClientMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reassignClient>>,
+    TError,
+    { id: number; data: BodyType<ReassignClientRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof reassignClient>>,
+  TError,
+  { id: number; data: BodyType<ReassignClientRequest> },
+  TContext
+> => {
+  const mutationKey = ["reassignClient"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof reassignClient>>,
+    { id: number; data: BodyType<ReassignClientRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return reassignClient(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReassignClientMutationResult = NonNullable<
+  Awaited<ReturnType<typeof reassignClient>>
+>;
+export type ReassignClientMutationBody = BodyType<ReassignClientRequest>;
+export type ReassignClientMutationError = ErrorType<ErrorResponse>;
+
+export const useReassignClient = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof reassignClient>>,
+    TError,
+    { id: number; data: BodyType<ReassignClientRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof reassignClient>>,
+  TError,
+  { id: number; data: BodyType<ReassignClientRequest> },
+  TContext
+> => {
+  return useMutation(getReassignClientMutationOptions(options));
+};
+
+export const getListClientAssignmentsUrl = (id: number) => {
+  return `/api/clients/${id}/assignments`;
+};
+
+export const listClientAssignments = async (
+  id: number,
+  options?: RequestInit,
+): Promise<ClientAssignment[]> => {
+  return customFetch<ClientAssignment[]>(getListClientAssignmentsUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListClientAssignmentsQueryKey = (id: number) => {
+  return [`/api/clients/${id}/assignments`] as const;
+};
+
+export const getListClientAssignmentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listClientAssignments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientAssignments>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListClientAssignmentsQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listClientAssignments>>
+  > = ({ signal }) => listClientAssignments(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof listClientAssignments>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListClientAssignmentsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listClientAssignments>>
+>;
+export type ListClientAssignmentsQueryError = ErrorType<ErrorResponse>;
+
+export function useListClientAssignments<
+  TData = Awaited<ReturnType<typeof listClientAssignments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  id: number,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listClientAssignments>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListClientAssignmentsQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
 export const getListOrdersUrl = () => {
   return `/api/orders`;
 };
@@ -861,6 +1027,169 @@ export function useListCommissions<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+export const getUpdateCommissionStatusUrl = (id: number) => {
+  return `/api/commissions/${id}/status`;
+};
+
+export const updateCommissionStatus = async (
+  id: number,
+  updateCommissionStatusRequest: UpdateCommissionStatusRequest,
+  options?: RequestInit,
+): Promise<Commission> => {
+  return customFetch<Commission>(getUpdateCommissionStatusUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCommissionStatusRequest),
+  });
+};
+
+export const getUpdateCommissionStatusMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCommissionStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+  TContext
+> => {
+  const mutationKey = ["updateCommissionStatus"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateCommissionStatus(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCommissionStatusMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCommissionStatus>>
+>;
+export type UpdateCommissionStatusMutationBody =
+  BodyType<UpdateCommissionStatusRequest>;
+export type UpdateCommissionStatusMutationError = ErrorType<ErrorResponse>;
+
+export const useUpdateCommissionStatus = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCommissionStatus>>,
+    TError,
+    { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateCommissionStatus>>,
+  TError,
+  { id: number; data: BodyType<UpdateCommissionStatusRequest> },
+  TContext
+> => {
+  return useMutation(getUpdateCommissionStatusMutationOptions(options));
+};
+
+export const getMarkCommissionsPaidUrl = () => {
+  return `/api/commissions/mark-paid`;
+};
+
+export const markCommissionsPaid = async (
+  markCommissionsPaidRequest: MarkCommissionsPaidRequest,
+  options?: RequestInit,
+): Promise<Commission[]> => {
+  return customFetch<Commission[]>(getMarkCommissionsPaidUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(markCommissionsPaidRequest),
+  });
+};
+
+export const getMarkCommissionsPaidMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    TError,
+    { data: BodyType<MarkCommissionsPaidRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof markCommissionsPaid>>,
+  TError,
+  { data: BodyType<MarkCommissionsPaidRequest> },
+  TContext
+> => {
+  const mutationKey = ["markCommissionsPaid"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    { data: BodyType<MarkCommissionsPaidRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return markCommissionsPaid(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MarkCommissionsPaidMutationResult = NonNullable<
+  Awaited<ReturnType<typeof markCommissionsPaid>>
+>;
+export type MarkCommissionsPaidMutationBody =
+  BodyType<MarkCommissionsPaidRequest>;
+export type MarkCommissionsPaidMutationError = ErrorType<ErrorResponse>;
+
+export const useMarkCommissionsPaid = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markCommissionsPaid>>,
+    TError,
+    { data: BodyType<MarkCommissionsPaidRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof markCommissionsPaid>>,
+  TError,
+  { data: BodyType<MarkCommissionsPaidRequest> },
+  TContext
+> => {
+  return useMutation(getMarkCommissionsPaidMutationOptions(options));
+};
 
 export const getGetDashboardSummaryUrl = () => {
   return `/api/dashboard/summary`;

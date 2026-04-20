@@ -6,7 +6,7 @@ import {
   clientsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -23,6 +23,7 @@ type EnrichedCommission = {
   roleType: "SALES" | "DISTRIBUTOR";
   status: "UNPAID" | "PAID";
   createdAt: string;
+  paidAt: string | null;
 };
 
 async function enrich(
@@ -72,6 +73,7 @@ async function enrich(
       roleType: c.roleType,
       status: c.status,
       createdAt: c.createdAt.toISOString(),
+      paidAt: c.paidAt ? c.paidAt.toISOString() : null,
     };
   });
 }
@@ -104,6 +106,65 @@ router.get("/", async (req, res) => {
       .orderBy(desc(commissionsTable.createdAt));
   }
   res.json(await enrich(rows));
+});
+
+router.patch("/:id/status", async (req, res) => {
+  const { role } = req.auth!;
+  if (role !== "ADMIN") {
+    res.status(403).json({ error: "Only admins can update commission status" });
+    return;
+  }
+  const id = Number(req.params.id);
+  const { status } = req.body ?? {};
+  if (!["UNPAID", "PAID"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
+  const [existing] = await db
+    .select()
+    .from(commissionsTable)
+    .where(eq(commissionsTable.id, id));
+  if (!existing) {
+    res.status(404).json({ error: "Commission not found" });
+    return;
+  }
+  await db
+    .update(commissionsTable)
+    .set({ status, paidAt: status === "PAID" ? new Date() : null })
+    .where(eq(commissionsTable.id, id));
+  const [refreshed] = await db
+    .select()
+    .from(commissionsTable)
+    .where(eq(commissionsTable.id, id));
+  const [enriched] = await enrich([refreshed]);
+  res.json(enriched);
+});
+
+router.post("/mark-paid", async (req, res) => {
+  const { role } = req.auth!;
+  if (role !== "ADMIN") {
+    res.status(403).json({ error: "Only admins can mark commissions paid" });
+    return;
+  }
+  const { ids } = req.body ?? {};
+  if (!Array.isArray(ids) || ids.length === 0) {
+    res.status(400).json({ error: "ids must be a non-empty array" });
+    return;
+  }
+  const numericIds = ids.map((v) => Number(v)).filter((n) => Number.isFinite(n));
+  if (numericIds.length === 0) {
+    res.status(400).json({ error: "ids must contain valid integers" });
+    return;
+  }
+  await db
+    .update(commissionsTable)
+    .set({ status: "PAID", paidAt: new Date() })
+    .where(inArray(commissionsTable.id, numericIds));
+  const updated = await db
+    .select()
+    .from(commissionsTable)
+    .where(inArray(commissionsTable.id, numericIds));
+  res.json(await enrich(updated));
 });
 
 export { enrich as enrichCommissions };

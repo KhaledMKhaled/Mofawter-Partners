@@ -11,6 +11,7 @@ import Layout from "@/components/layout";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminOrders from "@/pages/admin/orders";
 import AdminUsers from "@/pages/admin/users";
+import AdminClients from "@/pages/admin/clients";
 import AdminCommissions from "@/pages/admin/commissions";
 import AdminSettings from "@/pages/admin/settings";
 
@@ -68,6 +69,7 @@ function Router() {
       <Route path="/admin">{(params) => <ProtectedRoute component={AdminDashboard} role="ADMIN" />}</Route>
       <Route path="/admin/orders">{(params) => <ProtectedRoute component={AdminOrders} role="ADMIN" />}</Route>
       <Route path="/admin/users">{(params) => <ProtectedRoute component={AdminUsers} role="ADMIN" />}</Route>
+      <Route path="/admin/clients">{(params) => <ProtectedRoute component={AdminClients} role="ADMIN" />}</Route>
       <Route path="/admin/commissions">{(params) => <ProtectedRoute component={AdminCommissions} role="ADMIN" />}</Route>
       <Route path="/admin/settings">{(params) => <ProtectedRoute component={AdminSettings} role="ADMIN" />}</Route>
 

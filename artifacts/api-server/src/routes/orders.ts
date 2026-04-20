@@ -9,9 +9,12 @@ import {
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 import { getCommissionRates } from "../lib/commission";
+import { planCommissionUpdate } from "../lib/ownership";
 
 const router: IRouter = Router();
 router.use(requireAuth);
+
+class RevertBlockedError extends Error {}
 
 type EnrichedOrder = {
   id: number;
@@ -191,47 +194,60 @@ router.patch("/:id/status", async (req, res) => {
       .set({ status })
       .where(eq(ordersTable.id, orderId));
 
-    if (status === "COMPLETED" && !wasCompleted) {
-      // Apply 5-year ownership rule against the order PLACEMENT date,
-      // not the completion time. An order placed within the window earns
-      // commissions even if it is marked completed after the window closes;
-      // an order placed outside the window never earns commissions.
-      const placedAt = order.orderDate;
-      const inWindow =
-        placedAt >= client.ownershipStartDate &&
-        placedAt <= client.ownershipEndDate;
-      if (inWindow) {
-        const amountNum = Number(order.amount);
-        const salesAmount = +(amountNum * (rates.salesPct / 100)).toFixed(2);
-        const distAmount = +(amountNum * (rates.distributorPct / 100)).toFixed(
-          2,
+    // Apply 5-year ownership rule against the order PLACEMENT date,
+    // not the completion time. An order placed within the window earns
+    // commissions even if it is marked completed after the window closes;
+    // an order placed outside the window never earns commissions.
+    const plan = planCommissionUpdate({
+      prevStatus: order.status,
+      newStatus: status,
+      orderDate: order.orderDate,
+      amount: Number(order.amount),
+      ownershipStartDate: client.ownershipStartDate,
+      ownershipEndDate: client.ownershipEndDate,
+      assignedSalesId: client.assignedSalesId,
+      assignedDistributorId: client.assignedDistributorId,
+      rates,
+    });
+
+    if (plan.kind === "create") {
+      // Idempotency: clear any prior commissions for this order first
+      await tx
+        .delete(commissionsTable)
+        .where(eq(commissionsTable.orderId, orderId));
+      await tx.insert(commissionsTable).values(
+        plan.commissions.map((c) => ({
+          orderId: order.id,
+          userId: c.userId,
+          amount: String(c.amount),
+          roleType: c.roleType,
+        })),
+      );
+    } else if (plan.kind === "delete") {
+      // Reverting — refuse if any commission has already been paid out
+      const existing = await tx
+        .select()
+        .from(commissionsTable)
+        .where(eq(commissionsTable.orderId, orderId));
+      const paid = existing.filter((c) => c.status === "PAID");
+      if (paid.length > 0) {
+        throw new RevertBlockedError(
+          "Cannot revert order: one or more commissions have already been marked as PAID.",
         );
-        // Idempotency: clear any prior commissions for this order first
-        await tx
-          .delete(commissionsTable)
-          .where(eq(commissionsTable.orderId, orderId));
-        await tx.insert(commissionsTable).values([
-          {
-            orderId: order.id,
-            userId: client.assignedSalesId,
-            amount: String(salesAmount),
-            roleType: "SALES",
-          },
-          {
-            orderId: order.id,
-            userId: client.assignedDistributorId,
-            amount: String(distAmount),
-            roleType: "DISTRIBUTOR",
-          },
-        ]);
       }
-    } else if (status === "PENDING" && wasCompleted) {
-      // Reverting — remove commissions for this order
       await tx
         .delete(commissionsTable)
         .where(eq(commissionsTable.orderId, orderId));
     }
+  }).catch((err) => {
+    if (err instanceof RevertBlockedError) {
+      res.status(409).json({ error: err.message });
+      return undefined;
+    }
+    throw err;
   });
+
+  if (res.headersSent) return;
 
   const [refreshed] = await db
     .select()

@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CommissionRoleType } from "./commissionRoleType";
-import type { CommissionStatus } from "./commissionStatus";
+import type { CommissionStatusProperty } from "./commissionStatusProperty";
 
 export interface Commission {
   id: number;
@@ -20,6 +20,8 @@ export interface Commission {
   userName?: string | null;
   amount: number;
   roleType: CommissionRoleType;
-  status: CommissionStatus;
+  status: CommissionStatusProperty;
   createdAt: Date;
+  /** @nullable */
+  paidAt?: Date | null;
 }

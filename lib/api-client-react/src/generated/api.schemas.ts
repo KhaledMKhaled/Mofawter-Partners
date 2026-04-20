@@ -60,6 +60,33 @@ export interface Client {
   createdAt: string;
 }
 
+export interface ReassignClientRequest {
+  assignedSalesId: number;
+}
+
+export interface ClientAssignment {
+  id: number;
+  clientId: number;
+  /** @nullable */
+  fromSalesId?: number | null;
+  /** @nullable */
+  fromSalesName?: string | null;
+  /** @nullable */
+  fromDistributorId?: number | null;
+  /** @nullable */
+  fromDistributorName?: string | null;
+  toSalesId: number;
+  /** @nullable */
+  toSalesName?: string | null;
+  toDistributorId: number;
+  /** @nullable */
+  toDistributorName?: string | null;
+  changedById: number;
+  /** @nullable */
+  changedByName?: string | null;
+  createdAt: string;
+}
+
 export interface CreateClientRequest {
   name: string;
   /** @nullable */
@@ -103,6 +130,22 @@ export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }
 
+export type CommissionStatus =
+  (typeof CommissionStatus)[keyof typeof CommissionStatus];
+
+export const CommissionStatus = {
+  UNPAID: "UNPAID",
+  PAID: "PAID",
+} as const;
+
+export interface UpdateCommissionStatusRequest {
+  status: CommissionStatus;
+}
+
+export interface MarkCommissionsPaidRequest {
+  ids: number[];
+}
+
 export type CommissionRoleType =
   (typeof CommissionRoleType)[keyof typeof CommissionRoleType];
 
@@ -111,10 +154,10 @@ export const CommissionRoleType = {
   SALES: "SALES",
 } as const;
 
-export type CommissionStatus =
-  (typeof CommissionStatus)[keyof typeof CommissionStatus];
+export type CommissionStatusProperty =
+  (typeof CommissionStatusProperty)[keyof typeof CommissionStatusProperty];
 
-export const CommissionStatus = {
+export const CommissionStatusProperty = {
   UNPAID: "UNPAID",
   PAID: "PAID",
 } as const;
@@ -131,8 +174,10 @@ export interface Commission {
   userName?: string | null;
   amount: number;
   roleType: CommissionRoleType;
-  status: CommissionStatus;
+  status: CommissionStatusProperty;
   createdAt: string;
+  /** @nullable */
+  paidAt?: string | null;
 }
 
 export interface DashboardSummary {

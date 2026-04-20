@@ -153,6 +153,32 @@ export interface Order {
 export interface Client360Profile {
   client: Client;
   orders: Order[];
+  commissions: Commission[];
+  financials: {
+    subtotal: number;
+    vatTotal: number;
+    collectedTotal: number;
+    outstandingTotal: number;
+  };
+  timeline: Array<{
+    type:
+      | "ORDER_CREATED"
+      | "ORDER_STATUS_CHANGED"
+      | "COMMISSION_GENERATED"
+      | "COMMISSION_PAID";
+    occurredAt: string;
+    /** @nullable */
+    orderId: number | null;
+    /** @nullable */
+    orderName: string | null;
+    /** @nullable */
+    commissionId: number | null;
+    /** @nullable */
+    commissionStatus: "UNPAID" | "PAID" | null;
+    /** @nullable */
+    amount: number | null;
+    details: string;
+  }>;
 }
 
 export interface ReassignClientRequest {

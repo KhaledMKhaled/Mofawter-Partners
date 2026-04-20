@@ -6,9 +6,37 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Client } from "./client";
+import type { Commission } from "./commission";
 import type { Order } from "./order";
+
+export type ClientFinancialTimelineEventType =
+  | "ORDER_CREATED"
+  | "ORDER_STATUS_CHANGED"
+  | "COMMISSION_GENERATED"
+  | "COMMISSION_PAID";
+
+export interface ClientFinancialTotals {
+  subtotal: number;
+  vatTotal: number;
+  collectedTotal: number;
+  outstandingTotal: number;
+}
+
+export interface ClientFinancialTimelineEvent {
+  type: ClientFinancialTimelineEventType;
+  occurredAt: string;
+  orderId: number | null;
+  orderName: string | null;
+  commissionId: number | null;
+  commissionStatus: "UNPAID" | "PAID" | null;
+  amount: number | null;
+  details: string;
+}
 
 export interface Client360Profile {
   client: Client;
   orders: Order[];
+  commissions: Commission[];
+  financials: ClientFinancialTotals;
+  timeline: ClientFinancialTimelineEvent[];
 }

@@ -4,10 +4,11 @@ import {
   clientsTable,
   usersTable,
   ordersTable,
+  commissionsTable,
   clientAssignmentsTable,
 } from "@workspace/db";
 import { aliasedTable } from "drizzle-orm";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { requireAuth } from "../middlewares/auth";
 
 const router: IRouter = Router();
@@ -54,6 +55,12 @@ function toDto(c: typeof clientsTable.$inferSelect) {
     createdAt: c.createdAt.toISOString(),
   };
 }
+
+type FinancialTimelineEventType =
+  | "ORDER_CREATED"
+  | "ORDER_STATUS_CHANGED"
+  | "COMMISSION_GENERATED"
+  | "COMMISSION_PAID";
 
 router.get("/lookup", async (req, res, next) => {
   try {
@@ -236,6 +243,92 @@ router.get("/:id", async (req, res, next) => {
       .where(eq(ordersTable.clientId, clientId))
       .orderBy(desc(ordersTable.createdAt));
 
+    const orderIds = orders.map((o) => o.id);
+    const allCommissions = (
+      orderIds.length > 0
+        ? await db
+            .select()
+            .from(commissionsTable)
+            .where(inArray(commissionsTable.orderId, orderIds))
+        : []
+    ).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
+
+    const financials = {
+      subtotal: orders.reduce((sum, o) => sum + Number(o.amount), 0),
+      vatTotal: orders.reduce((sum, o) => sum + Number(o.vatAmount), 0),
+      collectedTotal: orders
+        .filter((o) => o.isFullyCollected)
+        .reduce((sum, o) => sum + Number(o.amount) + Number(o.vatAmount), 0),
+      outstandingTotal: orders
+        .filter((o) => !o.isFullyCollected)
+        .reduce((sum, o) => sum + Number(o.amount) + Number(o.vatAmount), 0),
+    };
+
+    const timeline: Array<{
+      type: FinancialTimelineEventType;
+      occurredAt: string;
+      orderId: number | null;
+      orderName: string | null;
+      commissionId: number | null;
+      commissionStatus: "UNPAID" | "PAID" | null;
+      amount: number | null;
+      details: string;
+    }> = [];
+
+    for (const o of orders) {
+      timeline.push({
+        type: "ORDER_CREATED",
+        occurredAt: o.createdAt.toISOString(),
+        orderId: o.id,
+        orderName: o.orderName,
+        commissionId: null,
+        commissionStatus: null,
+        amount: Number(o.amount) + Number(o.vatAmount),
+        details: `Order created (${o.status})`,
+      });
+
+      if (o.status !== "PENDING") {
+        timeline.push({
+          type: "ORDER_STATUS_CHANGED",
+          occurredAt: o.orderDate.toISOString(),
+          orderId: o.id,
+          orderName: o.orderName,
+          commissionId: null,
+          commissionStatus: null,
+          amount: Number(o.amount) + Number(o.vatAmount),
+          details: `Order marked ${o.status}`,
+        });
+      }
+    }
+
+    for (const c of allCommissions) {
+      timeline.push({
+        type: "COMMISSION_GENERATED",
+        occurredAt: c.createdAt.toISOString(),
+        orderId: c.orderId,
+        orderName: orders.find((o) => o.id === c.orderId)?.orderName ?? null,
+        commissionId: c.id,
+        commissionStatus: c.status,
+        amount: Number(c.amount),
+        details: `Commission created (${c.roleType})`,
+      });
+
+      if (c.paidAt) {
+        timeline.push({
+          type: "COMMISSION_PAID",
+          occurredAt: c.paidAt.toISOString(),
+          orderId: c.orderId,
+          orderName: orders.find((o) => o.id === c.orderId)?.orderName ?? null,
+          commissionId: c.id,
+          commissionStatus: c.status,
+          amount: Number(c.amount),
+          details: "Commission paid",
+        });
+      }
+    }
+
     res.json({
       client: toDto(client),
       orders: orders.map(o => ({
@@ -243,6 +336,16 @@ router.get("/:id", async (req, res, next) => {
         orderDate: o.orderDate.toISOString(),
         createdAt: o.createdAt.toISOString(),
       })),
+      commissions: allCommissions.map((c) => ({
+        ...c,
+        amount: Number(c.amount),
+        createdAt: c.createdAt.toISOString(),
+        paidAt: c.paidAt ? c.paidAt.toISOString() : null,
+      })),
+      financials,
+      timeline: timeline.sort(
+        (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
+      ),
     });
   } catch (err) {
     next(err);

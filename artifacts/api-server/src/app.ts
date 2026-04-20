@@ -39,8 +39,8 @@ const webDistDir = path.resolve(__dirname, "public");
 
 if (existsSync(webDistDir)) {
   app.use(express.static(webDistDir));
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) return next();
+  app.use((req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) return next();
     res.sendFile(path.join(webDistDir, "index.html"));
   });
   logger.info({ webDistDir }, "Serving static web app");

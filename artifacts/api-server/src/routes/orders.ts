@@ -192,10 +192,14 @@ router.patch("/:id/status", async (req, res) => {
       .where(eq(ordersTable.id, orderId));
 
     if (status === "COMPLETED" && !wasCompleted) {
-      // Apply 5-year ownership rule
-      const now = new Date();
+      // Apply 5-year ownership rule against the order PLACEMENT date,
+      // not the completion time. An order placed within the window earns
+      // commissions even if it is marked completed after the window closes;
+      // an order placed outside the window never earns commissions.
+      const placedAt = order.orderDate;
       const inWindow =
-        now >= client.ownershipStartDate && now <= client.ownershipEndDate;
+        placedAt >= client.ownershipStartDate &&
+        placedAt <= client.ownershipEndDate;
       if (inWindow) {
         const amountNum = Number(order.amount);
         const salesAmount = +(amountNum * (rates.salesPct / 100)).toFixed(2);

@@ -1,0 +1,26 @@
+Act as an expert Full-Stack Developer. I want to build a Minimum Viable Product (MVP) for a Sales and Distributor Commission Management System. 
+
+Tech Stack:
+- Next.js (App Router)
+- Tailwind CSS & Shadcn UI (for clean, fast interface)
+- Prisma ORM with SQLite (for easy local database setup)
+- NextAuth or a simple mock JWT authentication for MVP purposes.
+
+1. Database Schema (Prisma Models):
+- User: id, name, email, password, role (ADMIN, DISTRIBUTOR, SALES), distributorId (nullable, links Sales to Distributor).
+- Client: id, name, assignedSalesId, assignedDistributorId, ownershipStartDate (DateTime), ownershipEndDate (DateTime - defaults to 5 years after start date).
+- Order: id, clientId, orderName, amount, orderDate, status (PENDING, COMPLETED).
+- Commission: id, orderId, userId, amount, roleType (DISTRIBUTOR, SALES), status (UNPAID, PAID).
+
+2. User Roles & Dashboards (UI/UX):
+- ADMIN Portal: Can view all orders, change order status to COMPLETED, add new Distributors, set commission percentages, and view global financial reports.
+- DISTRIBUTOR Portal: Can add Sales agents under their account, view aggregate sales performance of their team, and view their total earned distributor commissions.
+- SALES Portal: Can add new Clients, submit new Orders for existing clients, and track their personal earned commissions.
+
+3. Core Business Logic (Crucial):
+- The 5-Year Ownership Rule: When a SALES agent submits an order for a CLIENT, check the Client's 'ownershipEndDate'. 
+- IF the current date is BEFORE the 'ownershipEndDate', automatically calculate commissions when the order status becomes COMPLETED.
+- Commission Calculation: Calculate a fixed percentage (e.g., 10%) of the Order amount for the SALES agent, and a fixed percentage (e.g., 5%) for the DISTRIBUTOR. Create two records in the 'Commission' table.
+- IF the current date is AFTER the 'ownershipEndDate', the order is processed, but NO commissions are generated for the Sales/Distributor.
+
+Please generate the initial boilerplate, set up the Prisma schema, and create the basic layouts and routing for the 3 different role dashboards. Include a simple seed script to create one Admin, one Distributor, and one Sales user so I can test logging in immediately.

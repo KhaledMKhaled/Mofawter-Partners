@@ -191,12 +191,14 @@ async function seed() {
     commissionRows.push(
       {
         orderId: o.id,
+        clientId: o.clientId,
         userId: sales.id,
         amount: (amount * 0.1).toFixed(2),
         roleType: "SALES",
       },
       {
         orderId: o.id,
+        clientId: o.clientId,
         userId: distributor.id,
         amount: (amount * 0.05).toFixed(2),
         roleType: "DISTRIBUTOR",

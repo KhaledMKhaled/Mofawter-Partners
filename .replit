@@ -2,12 +2,8 @@ modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
 deploymentTarget = "autoscale"
-build = [
-  "bash",
-  "-lc",
-  "pnpm --filter @workspace/commission-app run build && pnpm --filter @workspace/api-server run build && rm -rf artifacts/api-server/dist/public && cp -r artifacts/commission-app/dist/public artifacts/api-server/dist/public",
-]
-run = ["node", "--enable-source-maps", "artifacts/api-server/dist/index.mjs"]
+build = ["sh", "-c", "pnpm run build"]
+run = ["sh", "-c", "pnpm start"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]
